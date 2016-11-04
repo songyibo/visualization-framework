@@ -1,0 +1,12 @@
+.vis-widget {
+    position: absolute;
+    background-color: lightgrey;
+    border: 1px solid black;
+}
+
+.vis-widget-dragging {
+    cursor: move;
+    opacity: 0.8;
+    border-width: 2px;
+    z-index: 100;
+}

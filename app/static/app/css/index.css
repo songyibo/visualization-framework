@@ -1,8 +1,10 @@
-#svg-canvas {
+#main-canvas {
     width: 1860px;
     height: 850px;
+    margin: auto;
+    position: relative;
 }
 
-.svg-wrapper {
+.wrapper {
     text-align: center;
 }
