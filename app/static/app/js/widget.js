@@ -149,9 +149,9 @@ vis.widget = (function(vis) {
      * Data Source Widget
      */
     function DataSourceWidget(dataset) {
-        Widget.call(this, parent);
+        Widget.call(this);
 
-        this.w = 180; this.h = 90;
+        this.w = 180; this.h = 100;
         this.wMin = 150; this.hMin = 80;
 
         this.name = 'Data Source';
@@ -177,8 +177,39 @@ vis.widget = (function(vis) {
         title.css('line-height', this.h * 0.7 + 'px');
     };
 
+    /**
+     * Scatterplot Widget
+     */
+    function ScatterplotWidget() {
+        Widget.call(this);
+
+        this.w = 300; this.h = 300;
+        this.wMin = 200; this.hMin = 200;
+
+        this.name = 'Scatterplot';
+        this.index = ScatterplotWidget.prototype.counter++;
+        this.label = this.name + '_' + this.index;
+    }
+    ScatterplotWidget.prototype = Object.create(Widget.prototype);
+
+    ScatterplotWidget.prototype.init = function(parent, position) {
+        Widget.prototype.init.apply(this, arguments);
+        this._updateElement(this.widget);
+
+        return this;
+    };
+
+    ScatterplotWidget.prototype.counter = 1;
+
+    ScatterplotWidget.prototype._updateElement = function(widget) {
+        var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(widget);
+        var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
+        // this.svg = new vis.svg.Scatterplot(container.attr('id'));
+    };
+
     return {
-        DataSource: DataSourceWidget
+        DataSource: DataSourceWidget,
+        Scatterplot: ScatterplotWidget
     };
     
 })(vis);
