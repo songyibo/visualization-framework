@@ -1,0 +1,12 @@
+.vis-svg-axis-label {
+    font-size: 14px;
+    fill: #000;
+}
+
+.vis-svg-axis-label-x {
+    text-anchor: start;
+}
+
+.vis-svg-axis-label-y {
+    text-anchor: middle;
+}

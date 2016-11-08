@@ -34,9 +34,17 @@ vis.widget = (function(vis) {
         return this;
     };
 
+    Widget.prototype.resize = function(w, h) {
+        $(this.widget).css({
+            left: this.x,
+            top: this.y,
+            width: this.w,
+            height: this.h
+        });
+    };
+
     Widget.prototype._createElement = function(parent) {
-        var div = $('<div>').addClass('vis-widget');
-        $(parent).append(div);
+        var div = $('<div>').addClass('vis-widget').appendTo(parent);
 
         return div[0];
     };
@@ -59,7 +67,7 @@ vis.widget = (function(vis) {
                     $this.x = x0 + dx;
                     $this.y = y0 + dy;
 
-                    $this._move();
+                    $this.resize();
                 });
             }
         });
@@ -112,7 +120,13 @@ vis.widget = (function(vis) {
                     dy = e.pageY - Y0;
 
                     func.call($this, dx, dy, {x0, y0, w0, h0});
-                    $this._move();
+
+                    this.w = (this.w < this.wMin) ? this.wMin : this.w;
+                    this.h = (this.h < this.hMin) ? this.hMin : this.h;
+                    this.w = (this.w > this.wMax) ? this.wMax : this.w;
+                    this.h = (this.h > this.hMax) ? this.hMax : this.h;
+
+                    $this.resize();
                 });
             }
         });
@@ -128,21 +142,7 @@ vis.widget = (function(vis) {
     };
 
     Widget.prototype._update = function() {
-        this._move();
-    };
-
-    Widget.prototype._move = function() {
-        this.w = (this.w < this.wMin) ? this.wMin : this.w;
-        this.h = (this.h < this.hMin) ? this.hMin : this.h;
-        this.w = (this.w > this.wMax) ? this.wMax : this.w;
-        this.h = (this.h > this.hMax) ? this.hMax : this.h;
-
-        $(this.widget).css({
-            left: this.x,
-            top: this.y,
-            width: this.w,
-            height: this.h
-        });
+        this.resize();
     };
 
     /**
@@ -162,19 +162,16 @@ vis.widget = (function(vis) {
     }
     DataSourceWidget.prototype = Object.create(Widget.prototype);
 
-    DataSourceWidget.prototype.init = function(parent, position) {
-        Widget.prototype.init.apply(this, arguments);
-        this._updateElement(this.widget);
-
-        return this;
-    };
-
     DataSourceWidget.prototype.counter = 1;
 
-    DataSourceWidget.prototype._updateElement = function(widget) {
+    DataSourceWidget.prototype._createElement = function(parent) {
+        var widget = Widget.prototype._createElement.apply(this, arguments)
+
         var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(widget);
         var title = $('<div>').addClass('vis-widget-central').text(this.dataset).appendTo(widget);
-        title.css('line-height', this.h * 0.7 + 'px');
+        title.css('line-height', this.h * 0.5 + 'px');
+
+        return widget;
     };
 
     /**
@@ -192,19 +189,21 @@ vis.widget = (function(vis) {
     }
     ScatterplotWidget.prototype = Object.create(Widget.prototype);
 
-    ScatterplotWidget.prototype.init = function(parent, position) {
-        Widget.prototype.init.apply(this, arguments);
-        this._updateElement(this.widget);
-
-        return this;
+    ScatterplotWidget.prototype.resize = function() {
+        Widget.prototype.resize.call(this);
+        this.svg.resize(this.w - 20, this.h - 60);
     };
 
     ScatterplotWidget.prototype.counter = 1;
 
-    ScatterplotWidget.prototype._updateElement = function(widget) {
+    ScatterplotWidget.prototype._createElement = function(parent) {
+        var widget = Widget.prototype._createElement.apply(this, arguments);
+
         var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(widget);
         var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
-        // this.svg = new vis.svg.Scatterplot(container.attr('id'));
+        this.svg = new vis.svg.Scatterplot(container.attr('id'));
+
+        return widget;
     };
 
     return {

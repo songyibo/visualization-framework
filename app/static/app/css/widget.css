@@ -79,9 +79,13 @@
 }
 
 .vis-widget-label {
-
+    margin: 10px;
 }
 
 .vis-widget-central {
 
+}
+
+.vis-widget-container {
+    margin: 10px;
 }
