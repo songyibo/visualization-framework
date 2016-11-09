@@ -13,6 +13,7 @@
 }
 
 .vis-widget-label-wrapper {
+    text-align: center;
     margin: 10px;
 }
 
@@ -22,6 +23,7 @@
 }
 
 .vis-widget-select-wrapper {
+    text-align: center;
     margin: 10px;
 }
 
