@@ -1,18 +1,46 @@
 .vis-widget {
     position: absolute;
-    background-color: lightgrey;
-    border: 1px solid black;
+    background-color: rgb(242, 242, 242);
+    cursor: move;
+    border: 1px solid lightgray;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.vis-widget-label {
+    display: inline-block;
+    cursor: auto;
+}
+
+.vis-widget-label-wrapper {
+    margin: 10px;
+}
+
+.vis-widget-select {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.vis-widget-select-wrapper {
+    margin: 10px;
+}
+
+.vis-widget-container {
+    background-color: rgb(254, 254, 254);
+    cursor: auto;
+    margin: 10px;
 }
 
 .vis-widget-dragging {
     cursor: move;
     opacity: 0.8;
-    border-width: 2px;
+    border-color: black;
     z-index: 100;
 }
 
 .vis-widget-resizing {
     opacity: 0.8;
+    border-color: red;
     z-index: 100;
 }
 
@@ -76,16 +104,4 @@
     height: 11px;
     left: -6px;
     top: -6px;
-}
-
-.vis-widget-label {
-    margin: 10px;
-}
-
-.vis-widget-central {
-
-}
-
-.vis-widget-container {
-    margin: 10px;
 }

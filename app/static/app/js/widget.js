@@ -44,7 +44,7 @@ vis.widget = (function(vis) {
     };
 
     Widget.prototype._createElement = function(parent) {
-        var div = $('<div>').addClass('vis-widget').appendTo(parent);
+        var div = $('<div>').addClass('vis-widget vis-widget-allow-drag').appendTo(parent);
 
         return div[0];
     };
@@ -54,6 +54,7 @@ vis.widget = (function(vis) {
 
         $(widget).on('mousedown', function(e) {
             if (e.which == 1) {
+                if (!$(e.target).hasClass('vis-widget-allow-drag')) return;
                 e.preventDefault();
 
                 var X0 = e.pageX, Y0 = e.pageY;
@@ -121,10 +122,10 @@ vis.widget = (function(vis) {
 
                     func.call($this, dx, dy, {x0, y0, w0, h0});
 
-                    this.w = (this.w < this.wMin) ? this.wMin : this.w;
-                    this.h = (this.h < this.hMin) ? this.hMin : this.h;
-                    this.w = (this.w > this.wMax) ? this.wMax : this.w;
-                    this.h = (this.h > this.hMax) ? this.hMax : this.h;
+                    $this.w = ($this.w < $this.wMin) ? $this.wMin : $this.w;
+                    $this.h = ($this.h < $this.hMin) ? $this.hMin : $this.h;
+                    $this.w = ($this.w > $this.wMax) ? $this.wMax : $this.w;
+                    $this.h = ($this.h > $this.hMax) ? $this.hMax : $this.h;
 
                     $this.resize();
                 });
@@ -162,16 +163,39 @@ vis.widget = (function(vis) {
     }
     DataSourceWidget.prototype = Object.create(Widget.prototype);
 
+    DataSourceWidget.prototype.init = function(parent, position) {
+        Widget.prototype.init.apply(this, arguments);
+
+        this._setDatasetAction();
+    };
+
     DataSourceWidget.prototype.counter = 1;
 
     DataSourceWidget.prototype._createElement = function(parent) {
         var widget = Widget.prototype._createElement.apply(this, arguments)
 
-        var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(widget);
-        var title = $('<div>').addClass('vis-widget-central').text(this.dataset).appendTo(widget);
-        title.css('line-height', this.h * 0.5 + 'px');
+        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-drag').appendTo(widget);
+        var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
 
+        var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper vis-widget-allow-drag').appendTo(widget);
+        var select = $('<div>', {id: 'vis-widget-datasource-' + this.index, class: 'vis-widget-select'}).appendTo(selectWrapper);
+
+        var element = new vis.html.Dropdown(select.attr('id'), function(dataset) {
+            console.log(dataset);
+        });
+        
+        vis.network.getDatasets(function(datasets) {
+            for (i in datasets) {
+                element.addMenuItem(datasets[i]);
+            }
+        });
+
+        this.select = element;
         return widget;
+    };
+
+    DataSourceWidget.prototype._setDatasetAction = function() {
+
     };
 
     /**
@@ -199,7 +223,8 @@ vis.widget = (function(vis) {
     ScatterplotWidget.prototype._createElement = function(parent) {
         var widget = Widget.prototype._createElement.apply(this, arguments);
 
-        var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(widget);
+        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-drag').appendTo(widget);
+        var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
         var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
         this.svg = new vis.svg.Scatterplot(container.attr('id'));
 
