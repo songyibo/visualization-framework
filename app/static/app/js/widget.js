@@ -163,12 +163,6 @@ vis.widget = (function(vis) {
     }
     DataSourceWidget.prototype = Object.create(Widget.prototype);
 
-    DataSourceWidget.prototype.init = function(parent, position) {
-        Widget.prototype.init.apply(this, arguments);
-
-        this._setDatasetAction();
-    };
-
     DataSourceWidget.prototype.counter = 1;
 
     DataSourceWidget.prototype._createElement = function(parent) {
@@ -180,10 +174,14 @@ vis.widget = (function(vis) {
         var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper vis-widget-allow-drag').appendTo(widget);
         var select = $('<div>', {id: 'vis-widget-datasource-' + this.index, class: 'vis-widget-select'}).appendTo(selectWrapper);
 
+        // Set callback when user selects a new dataset.
+        // When new dataset selected, try to add the dataset to global controller.
         var element = new vis.html.Dropdown(select.attr('id'), function(dataset) {
-            console.log(dataset);
+            vis.control.instance().addDataset(dataset);
         });
         
+        // Get avaliable datasets from server.
+        // Add names to select widget when datasets return.
         vis.network.getDatasets(function(datasets) {
             for (i in datasets) {
                 element.addMenuItem(datasets[i]);
@@ -192,10 +190,6 @@ vis.widget = (function(vis) {
 
         this.select = element;
         return widget;
-    };
-
-    DataSourceWidget.prototype._setDatasetAction = function() {
-
     };
 
     /**
