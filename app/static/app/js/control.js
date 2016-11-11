@@ -3,6 +3,9 @@ var vis = vis || {};
 vis.control = (function(vis) {
 
     function Controller() {
+        this.widgetCanvas = 'vis-widget-canvas';
+        this.svgCanvas = 'vis-svg-canvas';
+
         this.datasets = {};
         this.modules = [];
     }
@@ -15,6 +18,40 @@ vis.control = (function(vis) {
                 $this.datasets[dataset] = data;
                 $this._updateDataSources(dataset);
             });
+        }
+    };
+
+    Controller.prototype.createModule = function(name, x, y) {
+        var module = null, widget = null;
+
+        switch (name) {
+            case 'DataSource':
+                module = new vis.module.DataSource();
+                widget = new vis.widget.DataSource().init(this.widgetCanvas, {x, y});
+                break;
+            case 'DataTable':
+                break;
+            case 'Scatterplot':
+                module = new vis.module.Scatterplot();
+                widget = new vis.widget.Scatterplot().init(this.widgetCanvas, {x, y});
+                break;
+            case 'ParallelCoordinates':
+                break;
+            case 'BarChart':
+                break;
+            case 'LineChart':
+                break;
+            case 'PieChart':
+                break;
+            case 'NetworkDiagram':
+                break;
+            default:
+                console.warning('No such module.');
+        }
+
+        if (module) {
+            module.widget = widget;
+            this.modules.push(module);
         }
     };
 
@@ -39,5 +76,6 @@ vis.control = (function(vis) {
 
 })(vis);
 
-var w1 = new vis.widget.DataSource().init('vis-widget-canvas', {x: 200, y: 200});
-var w2 = new vis.widget.Scatterplot().init('vis-widget-canvas', {x: 500, y: 100});
+var c = vis.control.instance();
+c.createModule('DataSource', 200, 200);
+c.createModule('Scatterplot', 500, 100);

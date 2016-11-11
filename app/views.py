@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-import json
 
 
 def index(request):
@@ -10,4 +9,14 @@ def index(request):
 def datasets(request):
     return JsonResponse({
         'datasets': ['car', 'test', 'transport']
+    })
+
+
+def dataset(request, dataset):
+    return JsonResponse({
+        'status': 'ok',
+        'dataset': {
+            'name': dataset,
+            'data': [1, 2, 3, 4, 5]
+        }
     })

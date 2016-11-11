@@ -3,15 +3,15 @@ var vis = vis || {};
 vis.network = (function(vis) {
 	
 	function getDatasets(callback) {
-		$.get('/datasets/', function(data) {
-			callback(data.datasets);
+		$.get('/datasets/', function(response) {
+			callback(response.datasets);
 		});
 	}
 
 	function getDataset(dataset, callback) {
 		var url = '/dataset/' + dataset + '/';
-		$.get(url, function(data) {
-			callback(data.dataset);
+		$.get(url, function(response) {
+			callback(response.dataset.data);
 		});
 	}
 

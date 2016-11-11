@@ -174,10 +174,12 @@ vis.widget = (function(vis) {
         var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper vis-widget-allow-drag').appendTo(widget);
         var select = $('<div>', {id: 'vis-widget-datasource-' + this.index, class: 'vis-widget-select'}).appendTo(selectWrapper);
 
+        var $this = this;
         // Set callback when user selects a new dataset.
         // When new dataset selected, try to add the dataset to global controller.
         var element = new vis.html.Dropdown(select.attr('id'), function(dataset) {
             vis.control.instance().addDataset(dataset);
+            $this.dataset = dataset;
         });
         
         // Get avaliable datasets from server.
