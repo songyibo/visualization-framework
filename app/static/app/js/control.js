@@ -21,42 +21,40 @@ vis.control = (function(vis) {
         }
     };
 
-    Controller.prototype.createModule = function(name, x, y) {
-        var module = null, widget = null;
-
-        switch (name) {
-            case 'DataSource':
-                module = new vis.module.DataSource();
-                widget = new vis.widget.DataSource().init(this.widgetCanvas, {x, y});
-                break;
-            case 'DataTable':
-                break;
-            case 'Scatterplot':
-                module = new vis.module.Scatterplot();
-                widget = new vis.widget.Scatterplot().init(this.widgetCanvas, {x, y});
-                break;
-            case 'ParallelCoordinates':
-                break;
-            case 'BarChart':
-                break;
-            case 'LineChart':
-                break;
-            case 'PieChart':
-                break;
-            case 'NetworkDiagram':
-                break;
-            default:
-                console.warning('No such module.');
-        }
-
-        if (module) {
-            module.widget = widget;
-            this.modules.push(module);
+    Controller.prototype._updateDataSources = function(dataset) {
+        for (i in this.modules) {
+            var m = this.modules[i];
+            if (m.name == 'Data Source') {
+                if (m.dataset == dataset) {
+                    m.setDataPort(['mpg', 'displacement', 'cylinder', 'name']);
+                }
+            }
         }
     };
 
-    Controller.prototype._updateDataSources = function(dataset) {
+    Controller.prototype._moduleMaker = {
+        DataSource: function() { return new vis.module.DataSource(); },
+        Scatterplot: function() { return new vis.module.Scatterplot(); },
+        DataTable: function() { return new vis.module.DataTable(); },
+        ParallelCoordinates: function() { return new vis.module.ParallelCoordinates(); },
+        BarChart: function() { return new vis.module.BarChart(); },
+        LineChart: function() { return new vis.module.LineChart(); },
+        PieChart: function() { return new vis.module.PieChart(); },
+        NetworkDiagram: function() { return new vis.module.NetworkDiagram(); }
+    };
 
+    Controller.prototype.createModule = function(name, x, y) {
+        var make = this._moduleMaker[name];
+        if (!make) {
+            console.warn('Module create failed: ' + name);
+            return;
+        }
+
+        var module = make();
+        if (module) {
+            module.init(this.widgetCanvas, {x, y});
+            this.modules.push(module);
+        }
     };
 
     var controller = null;
@@ -77,5 +75,5 @@ vis.control = (function(vis) {
 })(vis);
 
 var c = vis.control.instance();
-c.createModule('DataSource', 200, 200);
-c.createModule('Scatterplot', 500, 100);
+c.createModule('DataSource', 400, 50);
+c.createModule('Scatterplot', 340, 250);

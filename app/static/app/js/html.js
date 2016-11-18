@@ -10,7 +10,7 @@ vis.html = (function(vis) {
         var btnGroup = $('<div>').addClass('btn-group').appendTo(container);
         var button = $('<button>').addClass('btn btn-default btn-sm dropdown-toggle')
             .attr('type', 'button').attr('data-toggle', 'dropdown')
-            .html('<span>Select Dataset</span>&nbsp;<span class="caret"></span>').appendTo(btnGroup);
+            .html('<span>Select Dataset</span>&nbsp;&nbsp;<span class="caret"></span>').appendTo(btnGroup);
         var dropdownMenu = $('<ul>').addClass('dropdown-menu').appendTo(btnGroup);
 
         dropdownMenu.on('click', 'li a', function() {
