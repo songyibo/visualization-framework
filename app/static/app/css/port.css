@@ -5,6 +5,10 @@
     border-color: 1px solid lightgray;
 }
 
+.vis-port-container {
+    position: absolute;
+}
+
 .vis-port-data {
 	position: absolute;
 	cursor: pointer;
@@ -19,4 +23,9 @@
 	display: inline-block;
 	padding: 2px 4px;
 	border: 1px solid lightgray;
+	z-index: 100;
+}
+
+.vis-port-dragging {
+	border-color: blue;
 }

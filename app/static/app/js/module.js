@@ -28,7 +28,9 @@ vis.module = (function(vis) {
 
         this.widget = this._createWidget(this.parent);
         this.ports = this._createPorts(this.widget);
-        this._setDragAction(this.widget);
+
+        this._setMoveAction(this.widget);
+        this._setConnectAction(this.widget);
         this._setResizeAction(this.widget);
         this.resize();
 
@@ -47,7 +49,7 @@ vis.module = (function(vis) {
     };
 
     Module.prototype._createWidget = function(parent) {
-        var div = $('<div>').addClass('vis-widget vis-widget-allow-drag').appendTo(parent);
+        var div = $('<div>').addClass('vis-widget vis-widget-allow-move').appendTo(parent);
         return div[0];
     };
 
@@ -59,19 +61,19 @@ vis.module = (function(vis) {
         return;
     };
 
-    Module.prototype._setDragAction = function(widget) {
+    Module.prototype._setMoveAction = function(widget) {
         var $this = this;
 
         $(widget).on('mousedown', function(e) {
             if (e.which == 1) {
-                if (!$(e.target).hasClass('vis-widget-allow-drag')) return;
+                if (!$(e.target).hasClass('vis-widget-allow-move')) return;
                 e.preventDefault();
 
                 var X0 = e.pageX, Y0 = e.pageY;
                 var x0 = $this.x, y0 = $this.y;
 
-                $(widget).addClass('vis-widget-dragging');
-                $(document).on('mousemove.vis-widget-dragging', function(e) {
+                $(widget).addClass('vis-widget-moving');
+                $(document).on('mousemove.vis-widget-moving', function(e) {
                     dx = e.pageX - X0;
                     dy = e.pageY - Y0;
 
@@ -85,8 +87,82 @@ vis.module = (function(vis) {
 
         $(widget).on('mouseup', function(e) {
             if (e.which == 1) {
+                $(widget).removeClass('vis-widget-moving');
+                $(document).off('mousemove.vis-widget-moving');
+            }
+        });
+    };
+
+    Module.prototype._setConnectAction = function(widget) {
+        var $this = this;
+
+        var isSource = false;
+
+        $(widget).on('mousedown', function(e) {
+            if (e.which == 3) {
+                e.preventDefault();
+
+                // Record the widget where dragging starts.
+                vis.control.instance().setConnectSource($this);
+
+                var offset = $(this).offset();
+                var X0 = offset.left, Y0 = offset.top;
+
+                $(widget).addClass('vis-widget-dragging');
+                isSource = true;
+                
+                // Capture mouse event outside the widget.
+                $(document).on('mousemove.vis-widget-dragging', function(e) {
+                    var dx = e.pageX - X0, dy = e.pageY - Y0;
+                    console.log(dx, dy);
+                    // TODO: Invoke to draw pending connection.
+                    // vis.control.instance().updateCurve();
+                });
+
+                // Exit 1. Self. Source.
+                $(document).on('mouseup.vis-widget-dragging', function(e) {
+                    $(document).off('mousemove.vis-widget-dragging');
+                    $(document).off('mouseup.vis-widget-dragging');
+
+                    isSource = false;
+                    $(widget).removeClass('vis-widget-dragging');
+                });
+            }
+        });
+
+        $(widget).on('mousemove', function(e) {
+            if (e.which == 3) {
+                e.stopPropagation();
+                console.log('move on widget');
+            }
+        });
+        
+        // Exit 2. Target.
+        $(widget).on('mouseup', function(e) {
+            if (e.which == 3) {
+                // Record the widget where dragging ends.
+                vis.control.instance().setConnectTarget($this);
+                // TODO: Invoke to draw final connection.
+                vis.control.instance().connect();
+
                 $(widget).removeClass('vis-widget-dragging');
-                $(document).off('mousemove.vis-widget-dragging');
+                isSource = false;
+            }
+        });
+
+        $(widget).on('mouseenter', function(e) {
+            if (e.which == 3) {
+                if (!isSource) {
+                    $(widget).addClass('vis-widget-dragging');
+                }
+            }
+        });
+
+        $(widget).on('mouseleave', function(e) {
+            if (e.which == 3) {
+                if (!isSource) {
+                    $(widget).removeClass('vis-widget-dragging');
+                }
             }
         });
     };
@@ -116,7 +192,7 @@ vis.module = (function(vis) {
         $(this.handles).on('mousedown', function(e) {
             if (e.which == 1) {
                 e.preventDefault(); // Prevent DOM selection behavior.
-                e.stopPropagation(); // Prevent drag action on parent div.
+                e.stopPropagation(); // Prevent move action on parent div.
 
                 var X0 = e.pageX, Y0 = e.pageY;
                 var x0 = $this.x, y0 = $this.y;
@@ -181,10 +257,10 @@ vis.module = (function(vis) {
     DataSourceModule.prototype._createWidget = function(parent) {
         var widget = Module.prototype._createWidget.apply(this, arguments)
 
-        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-drag').appendTo(widget);
+        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-move').appendTo(widget);
         var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
 
-        var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper vis-widget-allow-drag').appendTo(widget);
+        var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper vis-widget-allow-move').appendTo(widget);
         var select = $('<div>', {id: 'vis-widget-datasource-' + this.index, class: 'vis-widget-select'}).appendTo(selectWrapper);
 
         var $this = this;
@@ -220,6 +296,18 @@ vis.module = (function(vis) {
         });
     };
 
+    DataSourceModule.prototype._setConnectAction = function(widget) {
+        var $this = this;
+
+        $(widget).on('mousedown', function(e) {
+            if (e.which == 3) {
+                e.preventDefault();
+                // Record the widget where dragging starts.
+                vis.control.instance().setConnectSource($this);
+            }
+        });
+    };
+
     /**
      * Scatterplot Module
      */
@@ -238,6 +326,8 @@ vis.module = (function(vis) {
     ScatterplotModule.prototype.resize = function() {
         Module.prototype.resize.call(this);
         this.svg.resize(this.w - 20, this.h - 60);
+        $(this.portContainer).css({top: 0, left: 0, width: this.w + 'px', height: this.h + 'px'});
+
     };
 
     ScatterplotModule.prototype.counter = 1;
@@ -245,7 +335,7 @@ vis.module = (function(vis) {
     ScatterplotModule.prototype._createWidget = function(parent) {
         var widget = Module.prototype._createWidget.apply(this, arguments);
 
-        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-drag').appendTo(widget);
+        var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-widget-allow-move').appendTo(widget);
         var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
         var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
         this.svg = new vis.svg.Scatterplot(container.attr('id'));
@@ -257,21 +347,31 @@ vis.module = (function(vis) {
         this.portSizeLarge = 40;
         this.portSizeSmall = 20;
 
-        var p1 = new vis.port.AxisInput(widget);
-        var p2 = new vis.port.ShapeInput(widget);
-        var p3 = new vis.port.SelectionInput(widget);
-        var p4 = new vis.port.SelectionOutput(widget);
+        var container = $('<div>').addClass('vis-port-container');
+        container.css({top: 0, left: 0, width: this.w + 'px', height: this.h + 'px'});
+        $(widget).append(container);
+        this.portContainer = container[0];
+
+        var p1 = new vis.port.AxisInput(this.portContainer);
+        var p2 = new vis.port.ShapeInput(this.portContainer);
+        var p3 = new vis.port.SelectionInput(this.portContainer);
+        var p4 = new vis.port.SelectionOutput(this.portContainer);
 
         return { axis: p1, shape: p2, sin: p3, sout: p4 };
     };
 
     ScatterplotModule.prototype._resizePorts = function() {
-        var s = this.portSizeSmall, l = this.portSizeLarge;
+/*        var s = this.portSizeSmall, l = this.portSizeLarge;
 
         this.ports.axis.resize({x: this.w / 2 - l, y: -s, w: l, h: s});
         this.ports.shape.resize({x: this.w / 2, y: -s, w: l, h: s});
         this.ports.sin.resize({x: -s, y: (this.h - l) / 2, w: s, h: l})
-        this.ports.sout.resize({x: this.w, y: (this.h - l) / 2, w: s, h: l});
+        this.ports.sout.resize({x: this.w, y: (this.h - l) / 2, w: s, h: l});*/
+
+        this.ports.axis.resize({x: 0, y: 0, w: this.w, h: this.h});
+        this.ports.shape.resize({x: 0, y: 0, w: this.w, h: this.h});
+        this.ports.sin.resize({x: 0, y: 0, w: this.w, h: this.h});
+        this.ports.sout.resize({x: 0, y: 0, w: this.w, h: this.h});
     };
 
     return {

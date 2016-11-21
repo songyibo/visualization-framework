@@ -15,6 +15,7 @@ vis.port = (function(vis) {
 
     Port.prototype._createElement = function(parent) {
         var element = $('<div>').addClass('vis-port');
+        element.hide();
         $(parent).append(element);
 
         this.element = element[0];
@@ -55,7 +56,10 @@ vis.port = (function(vis) {
             e.append(div);
         }
 
-        // TODO: Set data output port actions here.
+        var $this = this;
+        $(this.element).children().each(function(index, item) {
+            $this._setConnectAction(item);
+        });
 
         this.resize();
     };
@@ -85,9 +89,35 @@ vis.port = (function(vis) {
     };
 
     DataPort.prototype._createElement = function(parent) {
-        var element = $('<div>').addClass('vis-port-data vis-port-container');
+        var element = $('<div>').addClass('vis-port-data');
         $(parent).append(element);
         this.element = element[0];
+    };
+
+    DataPort.prototype._setConnectAction = function(item) {
+        var $this = this;
+
+        $(item).on('mousedown', function(e) {
+            if (e.which == 3) {
+                $this.source = this;
+                vis.control.instance().setSourceData($(this).text());
+
+                $(item).addClass('vis-port-dragging');
+
+                $(document).on('mousemove.vis-port-dragging', function(e) {
+                    console.log('port dragging');
+                    // TODO: Invoke to draw pending connection.
+                    // vis.control.instance().updateCurve();
+                });
+
+                $(document).on('mouseup.vis-port-dragging', function(e) {
+                    $(document).off('mousemove.vis-port-dragging');
+                    $(document).off('mouseup.vis-port-dragging');
+
+                    $(item).removeClass('vis-port-dragging');
+                });
+            }
+        });
     };
 
     function AxisInputPort() {
@@ -97,6 +127,7 @@ vis.port = (function(vis) {
 
     AxisInputPort.prototype._createElement = function(parent) {
         Port.prototype._createElement.apply(this, arguments);
+        $(this.element).addClass('vis-port-axis');
     };
 
     function ShapeInputPort() {
@@ -104,15 +135,30 @@ vis.port = (function(vis) {
     }
     ShapeInputPort.prototype = Object.create(Port.prototype);
 
+    ShapeInputPort.prototype._createElement = function(parent) {
+        Port.prototype._createElement.apply(this, arguments);
+        $(this.element).addClass('vis-port-shape');
+    };
+
     function SelectionInputPort() {
         Port.apply(this, arguments);
     }
     SelectionInputPort.prototype = Object.create(Port.prototype);
 
+    SelectionInputPort.prototype._createElement = function(parent) {
+        Port.prototype._createElement.apply(this, arguments);
+        $(this.element).addClass('vis-port-sin');
+    };
+
     function SelectionOutputPort() {
         Port.apply(this, arguments);
     }
     SelectionOutputPort.prototype = Object.create(Port.prototype);
+
+    SelectionOutputPort.prototype._createElement = function(parent) {
+        Port.prototype._createElement.apply(this, arguments);
+        $(this.element).addClass('vis-port-sout');
+    };
 
     return {
         DataPort: DataPort,

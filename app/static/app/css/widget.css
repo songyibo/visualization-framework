@@ -34,6 +34,10 @@
 }
 
 .vis-widget-dragging {
+    border-color: blue;
+}
+
+.vis-widget-moving {
     cursor: move;
     opacity: 0.8;
     border-color: black;

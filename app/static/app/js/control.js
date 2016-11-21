@@ -33,6 +33,25 @@ vis.control = (function(vis) {
         }
     };
 
+    Controller.prototype.setConnectSource = function(source) {
+        this.connectSource = source;
+    };
+
+    Controller.prototype.setConnectTarget = function(target) {
+        this.connectTarget = target;
+    };
+
+    Controller.prototype.setSourceData = function(data) {
+        this.sourceData = data;
+    }
+
+    Controller.prototype.connect = function() {
+        var s = this.connectSource, t = this.connectTarget;
+        if (!s || !t) return;
+
+        console.log(s, t, this.sourceData);
+    };
+
     Controller.prototype._updateDataSources = function(dataset, columns) {
         // Implemented for tabular data.
         for (i in this.modules) {
@@ -76,6 +95,12 @@ vis.control = (function(vis) {
         return new Controller();
     }
 
+    (function setup() {
+        $(document).ready(function() {
+            $(document).on('contextmenu', function(e) { e.preventDefault(); });
+        });
+    })();
+
     return {
         instance: function() {
             if (!controller) {
@@ -89,4 +114,5 @@ vis.control = (function(vis) {
 
 var c = vis.control.instance();
 c.createModule('DataSource', 400, 50);
-c.createModule('Scatterplot', 340, 250);
+c.createModule('Scatterplot', 150, 250);
+c.createModule('Scatterplot', 550, 250);
