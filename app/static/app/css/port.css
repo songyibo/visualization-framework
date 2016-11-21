@@ -1,7 +1,7 @@
 .vis-port {
     position: absolute;
     cursor: pointer;
-    background-color: rgb(242, 242, 242);
+    background-color: rgb(232, 232, 232);
     border-color: 1px solid lightgray;
 }
 

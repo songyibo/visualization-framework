@@ -93,3 +93,6 @@ ENV/
 
 # migration files
 /app/migrations
+
+# media files
+/media

@@ -18,7 +18,6 @@ vis.port = (function(vis) {
         $(parent).append(element);
 
         this.element = element[0];
-        this.resize();
     };
 
     Port.prototype.resize = function(position) {
@@ -56,7 +55,7 @@ vis.port = (function(vis) {
             e.append(div);
         }
 
-        // TODO: Set data output port actins here.
+        // TODO: Set data output port actions here.
 
         this.resize();
     };
@@ -90,10 +89,6 @@ vis.port = (function(vis) {
         $(parent).append(element);
         this.element = element[0];
     };
-
-/*    DataPort.prototype._drawDataPort = function() {
-        
-    };*/
 
     function AxisInputPort() {
         Port.apply(this, arguments);

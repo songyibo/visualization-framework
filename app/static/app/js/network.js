@@ -11,7 +11,7 @@ vis.network = (function(vis) {
 	function getDataset(dataset, callback) {
 		var url = '/dataset/' + dataset + '/';
 		$.get(url, function(response) {
-			callback(response.dataset.data);
+			callback(response.dataset);
 		});
 	}
 

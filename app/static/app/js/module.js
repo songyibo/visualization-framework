@@ -191,8 +191,8 @@ vis.module = (function(vis) {
         // Set callback when user selects a new dataset.
         // When new dataset selected, try to add the dataset to global controller.
         var element = new vis.html.Dropdown(select.attr('id'), function(dataset) {
-            vis.control.instance().addDataset(dataset);
             $this.dataset = dataset;
+            vis.control.instance().addDataset(dataset);
         });
         
         // Get avaliable datasets from server.

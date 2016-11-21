@@ -10,23 +10,36 @@ vis.control = (function(vis) {
         this.modules = [];
     }
 
+    Controller.prototype.hasDataset = function(dataset) {
+        return !!(this.datasets[dataset]);
+    };
+
+    Controller.prototype.getDataset = function(dataset) {
+        return this.datasets[dataset] || null;
+    };
+
     Controller.prototype.addDataset = function(dataset) {
         var $this = this;
 
         if (!this.datasets[dataset]) {
-            vis.network.getDataset(dataset, function(data) {
-                $this.datasets[dataset] = data;
-                $this._updateDataSources(dataset);
+            vis.network.getDataset(dataset, function(dataset) {
+                $this.datasets[dataset] = dataset;
+                // Temporarily for tabular data: passing column parameter in.
+                $this._updateDataSources(dataset.name, dataset.columns.map(function(c) { return c.name; }));
             });
+        } else {
+            var ds = this.datasets[dataset];
+            $this._updateDataSources(ds.name, ds.columns.map(function(c) { return c.name; }));
         }
     };
 
-    Controller.prototype._updateDataSources = function(dataset) {
+    Controller.prototype._updateDataSources = function(dataset, columns) {
+        // Implemented for tabular data.
         for (i in this.modules) {
             var m = this.modules[i];
             if (m.name == 'Data Source') {
                 if (m.dataset == dataset) {
-                    m.setDataPort(['mpg', 'displacement', 'cylinder', 'name']);
+                    m.setDataPort(columns);
                 }
             }
         }
