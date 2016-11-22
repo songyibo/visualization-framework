@@ -22,10 +22,10 @@ vis.control = (function(vis) {
         var $this = this;
 
         if (!this.datasets[dataset]) {
-            vis.network.getDataset(dataset, function(dataset) {
-                $this.datasets[dataset] = dataset;
+            vis.network.getDataset(dataset, function(response) {
+                $this.datasets[dataset] = response;
                 // Temporarily for tabular data: passing column parameter in.
-                $this._updateDataSources(dataset.name, dataset.columns.map(function(c) { return c.name; }));
+                $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
             });
         } else {
             var ds = this.datasets[dataset];
@@ -41,15 +41,19 @@ vis.control = (function(vis) {
         this.connectTarget = target;
     };
 
-    Controller.prototype.setSourceData = function(data) {
+    Controller.prototype.setSourceData = function(dataset, data) {
+        this.sourceDataset = dataset;
         this.sourceData = data;
     }
 
     Controller.prototype.connect = function() {
         var s = this.connectSource, t = this.connectTarget;
+        var dataset = this.sourceDataset, data = this.sourceData;
         if (!s || !t) return;
 
-        console.log(s, t, this.sourceData);
+        if (s.type == 'data') {
+            t.setAxisInput(this.datasets[dataset].data.root, dataset, data);
+        }
     };
 
     Controller.prototype._updateDataSources = function(dataset, columns) {

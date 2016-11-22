@@ -100,7 +100,7 @@ vis.port = (function(vis) {
         $(item).on('mousedown', function(e) {
             if (e.which == 3) {
                 $this.source = this;
-                vis.control.instance().setSourceData($(this).text());
+                vis.control.instance().setSourceData($this.dataset, $(this).text());
 
                 $(item).addClass('vis-port-dragging');
 

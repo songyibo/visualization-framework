@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from app.models import *
+from app.helper import *
 import json
 import csv
 
@@ -40,7 +41,17 @@ def dataset(request, dataset):
 
         with open(ds.file.path) as infile:
             reader = csv.DictReader(infile)
-            data = [row for row in reader]
+            data = []
+            for row in reader:
+                entry = {}
+                for c in columns:
+                    if c['type'] == Field.INTEGER:
+                        entry[c['name']] = parse_int(row[c['name']])
+                    elif c['type'] == Field.REAL:
+                        entry[c['name']] = parse_float(row[c['name']])
+                    else:
+                        entry[c['name']] = row[c['name']]
+                data.append(entry)
 
         return JsonResponse({
             'status': 'ok',

@@ -140,13 +140,16 @@ vis.module = (function(vis) {
         // Exit 2. Target.
         $(widget).on('mouseup', function(e) {
             if (e.which == 3) {
+                if (isSource) {
+                    isSource = false;
+                    return;
+                }
                 // Record the widget where dragging ends.
                 vis.control.instance().setConnectTarget($this);
                 // TODO: Invoke to draw final connection.
                 vis.control.instance().connect();
 
                 $(widget).removeClass('vis-widget-dragging');
-                isSource = false;
             }
         });
 
@@ -242,13 +245,15 @@ vis.module = (function(vis) {
         this.index = DataSourceModule.prototype.counter++;
         this.label = this.name + '_' + this.index;
 
-        this.dataset = dataset || 'Empty Dataset';
+        this.type = 'data';
+        this.dataset = dataset || '';
     }
     DataSourceModule.prototype = Object.create(Module.prototype);
 
     DataSourceModule.prototype.setDataPort = function(items) {
         if (this.ports.data) {
             this.ports.data.setDataItems(items);
+            this.ports.data.dataset = this.dataset;
         }
     };
 
@@ -320,6 +325,8 @@ vis.module = (function(vis) {
         this.name = 'Scatterplot';
         this.index = ScatterplotModule.prototype.counter++;
         this.label = this.name + '_' + this.index;
+
+        this.type = 'view';
     }
     ScatterplotModule.prototype = Object.create(Module.prototype);
 
@@ -327,7 +334,34 @@ vis.module = (function(vis) {
         Module.prototype.resize.call(this);
         this.svg.resize(this.w - 20, this.h - 60);
         $(this.portContainer).css({top: 0, left: 0, width: this.w + 'px', height: this.h + 'px'});
+        $(this.portContainer).css({display: 'none'});
+    };
 
+    ScatterplotModule.prototype.setAxisInput = function(data, dataset, key) {
+        if (this.dataset != dataset) {
+            this.dataset = dataset;
+            this.xAxis = '';
+        }
+
+        this.data = data;
+
+        if (this.yAxis) {
+            this.xAxis = this.yAxis;
+            this.yAxis = key;
+        } else if (this.xAxis) {
+            this.yAxis = key;
+        } else {
+            this.xAxis = key;
+            this.yAxis = '';
+        }
+
+        if (this.xAxis && this.yAxis) {
+            this.svg.render(data, {
+                x: this.xAxis,
+                y: this.yAxis,
+                color: null
+            });
+        }
     };
 
     ScatterplotModule.prototype.counter = 1;
@@ -348,7 +382,6 @@ vis.module = (function(vis) {
         this.portSizeSmall = 20;
 
         var container = $('<div>').addClass('vis-port-container');
-        container.css({top: 0, left: 0, width: this.w + 'px', height: this.h + 'px'});
         $(widget).append(container);
         this.portContainer = container[0];
 
@@ -361,13 +394,6 @@ vis.module = (function(vis) {
     };
 
     ScatterplotModule.prototype._resizePorts = function() {
-/*        var s = this.portSizeSmall, l = this.portSizeLarge;
-
-        this.ports.axis.resize({x: this.w / 2 - l, y: -s, w: l, h: s});
-        this.ports.shape.resize({x: this.w / 2, y: -s, w: l, h: s});
-        this.ports.sin.resize({x: -s, y: (this.h - l) / 2, w: s, h: l})
-        this.ports.sout.resize({x: this.w, y: (this.h - l) / 2, w: s, h: l});*/
-
         this.ports.axis.resize({x: 0, y: 0, w: this.w, h: this.h});
         this.ports.shape.resize({x: 0, y: 0, w: this.w, h: this.h});
         this.ports.sin.resize({x: 0, y: 0, w: this.w, h: this.h});
