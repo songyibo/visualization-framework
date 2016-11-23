@@ -10,3 +10,11 @@
 .vis-svg-axis-label-y {
     text-anchor: middle;
 }
+
+.vis-svg-scatterplot-circle {
+
+}
+
+.vis-svg-scatterplot-selected {
+	fill: red;
+}
