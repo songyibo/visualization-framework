@@ -58,7 +58,7 @@ vis.control = (function(vis) {
 
     Controller.prototype._updateDataSources = function(dataset, columns) {
         // Implemented for tabular data.
-        for (i in this.modules) {
+        for (var i in this.modules) {
             var m = this.modules[i];
             if (m.name == 'Data Source') {
                 if (m.dataset == dataset) {

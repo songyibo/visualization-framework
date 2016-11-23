@@ -51,7 +51,7 @@ vis.port = (function(vis) {
         var e = $(this.element);
         e.empty();
 
-        for (i in items) {
+        for (var i in items) {
             var div = $('<div>').addClass('vis-port-data-item').text(items[i]);
             e.append(div);
         }

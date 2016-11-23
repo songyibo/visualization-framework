@@ -186,7 +186,7 @@ vis.module = (function(vis) {
 
         this.handles = [];
         var handles = ['n', 'e', 's', 'w', 'se', 'sw', 'ne', 'nw'];
-        for (i in handles) {
+        for (var i in handles) {
             var h = $('<div>').addClass('vis-widget-resize-handle').addClass('vis-widget-resize-' + handles[i]);
             $(widget).append(h);
             this.handles.push(h[0]);
@@ -279,7 +279,7 @@ vis.module = (function(vis) {
         // Get avaliable datasets from server.
         // Add names to select widget when datasets return.
         vis.network.getDatasets(function(datasets) {
-            for (i in datasets) {
+            for (var i in datasets) {
                 element.addMenuItem(datasets[i]);
             }
         });
@@ -332,7 +332,7 @@ vis.module = (function(vis) {
 
     ScatterplotModule.prototype.resize = function() {
         Module.prototype.resize.call(this);
-        this.svg.resize(this.w - 20, this.h - 60);
+        this.svg.resize(this.w - 22, this.h - 60);
         $(this.portContainer).css({top: 0, left: 0, width: this.w + 'px', height: this.h + 'px'});
         $(this.portContainer).css({display: 'none'});
     };
