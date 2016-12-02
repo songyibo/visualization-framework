@@ -57,9 +57,10 @@ vis.ui = (function(vis) {
 
         var handles = [];
         var hs = ['n', 'e', 's', 'w', 'se', 'sw', 'ne', 'nw'];
+        var box = $('<div>').addClass('vis-ui-resize-handles').appendTo(widget);
         for (var i in hs) {
             var handle = $('<div>').addClass('vis-ui-resize-handle').addClass('vis-ui-resize-' + hs[i]);
-            $(widget).append(handle);
+            box.append(handle);
             handles.push(handle[0]);
         }
 

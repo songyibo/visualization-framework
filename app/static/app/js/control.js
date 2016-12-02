@@ -44,7 +44,7 @@ vis.control = (function(vis) {
     Controller.prototype.setSourceData = function(dataset, data) {
         this.sourceDataset = dataset;
         this.sourceData = data;
-    }
+    };
 
     Controller.prototype.connect = function() {
         var s = this.connectSource, t = this.connectTarget;
@@ -76,7 +76,8 @@ vis.control = (function(vis) {
         BarChart: function() { return new vis.module.BarChart(); },
         LineChart: function() { return new vis.module.LineChart(); },
         PieChart: function() { return new vis.module.PieChart(); },
-        NetworkDiagram: function() { return new vis.module.NetworkDiagram(); }
+        NetworkDiagram: function() { return new vis.module.NetworkDiagram(); },
+        CustomView: function() { return new vis.module.CustomView(); }
     };
 
     Controller.prototype.createModule = function(name, x, y) {
@@ -88,7 +89,7 @@ vis.control = (function(vis) {
 
         var module = make();
         if (module) {
-            module.init(this.widgetCanvas, {x, y});
+            module.init(this.widgetCanvas, {x: x, y: y});
             this.modules.push(module);
         }
     };
@@ -118,5 +119,6 @@ vis.control = (function(vis) {
 
 var c = vis.control.instance();
 c.createModule('DataSource', 400, 50);
-c.createModule('Scatterplot', 150, 250);
-c.createModule('Scatterplot', 550, 250);
+c.createModule('CustomView', 350, 250);
+// c.createModule('Scatterplot', 150, 250);
+// c.createModule('Scatterplot', 550, 250);

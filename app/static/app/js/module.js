@@ -101,9 +101,11 @@ vis.module = (function(vis) {
         Module.prototype._setConnectAction = function(widget) {
             var $this = this;
             vis.ui.connectable(widget, {
-                start: function() {},
-                connect: function(x, y) {
+                start: function() {
+                    // Record this source data widget.
                     vis.control.instance().setConnectSource($this);
+                },
+                connect: function(x, y) {
                     // TODO: Invoke to draw pending connection.
                     // vis.control.instance().updateCurve();
                 },
@@ -258,7 +260,7 @@ vis.module = (function(vis) {
         ScatterplotModule.prototype._createWidget = function(parent) {
             var widget = Module.prototype._createWidget.apply(this, arguments);
 
-            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper vis-ui-draggable').appendTo(widget);
+            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(widget);
             var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
             var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
             this.svg = new vis.svg.Scatterplot(container.attr('id'));
@@ -289,9 +291,46 @@ vis.module = (function(vis) {
         return ScatterplotModule;
     })();
 
+    var CustomViewModule = (function() {
+        function CustomViewModule() {
+            Module.call(this);
+
+            this.w = 300; this.h = 300;
+            this.hMin = 200; this.wMin = 200;
+
+            this.name = 'Visualization';
+            this.index = CustomViewModule.prototype.counter++;
+            this.label = this.name + '_' + this.index;
+
+            this.type = 'view';
+        }
+        CustomViewModule.prototype = Object.create(Module.prototype);
+
+        CustomViewModule.prototype.counter = 1;
+
+        CustomViewModule.prototype._createWidget = function(parent) {
+            var widget = Module.prototype._createWidget.apply(this, arguments);
+
+            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(widget);
+            var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
+            var container = $('<div>', {id: 'vis-widget-view-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
+            this.svg = new vis.svg.CustomCanvas(container.attr('id'));
+
+            return widget;
+        };
+
+        CustomViewModule.prototype.updateComponent = function() {
+            Module.prototype.updateComponent.call(this);
+            this.svg.resize(this.w - 22, this.h - 55);
+        };
+
+        return CustomViewModule;
+    })();
+
     return {
         DataSource: DataSourceModule,
-        Scatterplot: ScatterplotModule
+        Scatterplot: ScatterplotModule,
+        CustomView: CustomViewModule
     };
     
 })(vis);
