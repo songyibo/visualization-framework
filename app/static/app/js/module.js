@@ -29,13 +29,15 @@ vis.module = (function(vis) {
             if (!this.parent) return;
 
             this.widget = this._createWidget(this.parent);
+            this.elements = this._createElements(this.widget);
             this.ports = this._createPorts(this.widget);
+
             this._setDragAction(this.widget);
             this._setResizeAction(this.widget);
             this._setConnectAction(this.widget);
 
             this.updateSize();
-            this.updateComponent();
+            this.updateComponents();
             return this;
         };
 
@@ -55,13 +57,17 @@ vis.module = (function(vis) {
             });
         };
 
-        Module.prototype.updateComponent = function() {
+        Module.prototype.updateComponents = function() {
             this._resizePorts();
         };
 
         Module.prototype._createWidget = function(parent) {
             var div = $('<div>').addClass('vis-widget').appendTo(parent);
             return div[0];
+        };
+
+        Module.prototype._createElements = function(parent) {
+            return {};
         };
 
         Module.prototype._createPorts = function(widget) {
@@ -92,7 +98,7 @@ vis.module = (function(vis) {
                     if (pos) {
                         $this.setSize(pos.x, pos.y, pos.w, pos.h);
                     }
-                    $this.updateComponent();
+                    $this.updateComponents();
                 },
                 end: function() {}
             });
@@ -223,8 +229,8 @@ vis.module = (function(vis) {
         }
         ScatterplotModule.prototype = Object.create(Module.prototype);
 
-        ScatterplotModule.prototype.updateComponent = function() {
-            Module.prototype.updateComponent.call(this);
+        ScatterplotModule.prototype.updateComponents = function() {
+            Module.prototype.updateComponents.call(this);
             this.svg.resize(this.w - 22, this.h - 60);
         };
 
@@ -303,10 +309,46 @@ vis.module = (function(vis) {
             this.label = this.name + '_' + this.index;
 
             this.type = 'view';
+            this.elements = [];
         }
         CustomViewModule.prototype = Object.create(Module.prototype);
 
         CustomViewModule.prototype.counter = 1;
+
+        CustomViewModule.prototype.init = function(parent, position) {
+            Module.prototype.init.apply(this, arguments);
+            this._setDropAction(this.widget);
+            var $this = this;
+            $(this.button).on('click', function(e) {
+                e.stopPropagation();
+                $this.panel.toggle();
+            });
+            $(this.button).on('mousedown', function(e) { e.stopPropagation(); });
+            return this;
+        };
+
+        CustomViewModule.prototype.addElement = function(name) {
+            var make = vis.element.construct[name];
+            if (!make) {
+                console.warn('Element create failed: ' + name);
+                return;
+            }
+
+            var element = make();
+            if (element) {
+                this.elements.push({
+                    name: element.name + this.elements.length                   
+                });
+            }
+            // TODO: Interface add logic.
+            this.elements[element.name] = element;
+        };
+
+        CustomViewModule.prototype.updateComponents = function() {
+            Module.prototype.updateComponents.call(this);
+            this.panel.resize(-1, -105, this.w, 100);
+            this.svg.resize(this.w - 22, this.h - 57);
+        };
 
         CustomViewModule.prototype._createWidget = function(parent) {
             var widget = Module.prototype._createWidget.apply(this, arguments);
@@ -314,20 +356,40 @@ vis.module = (function(vis) {
             var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(widget);
             var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
             var container = $('<div>', {id: 'vis-widget-view-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
+            
+            var button = $('<span>').addClass('glyphicon glyphicon-cog').addClass('vis-widget-button').appendTo(labelWrapper);
+            this.button = button[0];
+
+            this.panel = new vis.ui.SubPanel(widget);
             this.svg = new vis.svg.CustomCanvas(container.attr('id'));
 
             return widget;
         };
 
-        CustomViewModule.prototype.updateComponent = function() {
-            Module.prototype.updateComponent.call(this);
-            this.svg.resize(this.w - 22, this.h - 55);
+        CustomViewModule.prototype._setDropAction = function(widget) {
+            var $this = this;
+            vis.ui.droppable(widget, {
+                drop: function(element) {
+                    if (element) {
+                        $this.addElement(element);
+                    }
+                }
+            });
         };
 
         return CustomViewModule;
     })();
 
+    var construct = {
+        DataSource: function() { return new DataSourceModule(); },
+        
+        CustomView: function() { return new CustomViewModule(); },
+        Scatterplot: function() { return new ScatterplotModule(); }
+    };
+
     return {
+        construct: construct,
+
         DataSource: DataSourceModule,
         Scatterplot: ScatterplotModule,
         CustomView: CustomViewModule

@@ -68,20 +68,8 @@ vis.control = (function(vis) {
         }
     };
 
-    Controller.prototype._moduleMaker = {
-        DataSource: function() { return new vis.module.DataSource(); },
-        Scatterplot: function() { return new vis.module.Scatterplot(); },
-        DataTable: function() { return new vis.module.DataTable(); },
-        ParallelCoordinates: function() { return new vis.module.ParallelCoordinates(); },
-        BarChart: function() { return new vis.module.BarChart(); },
-        LineChart: function() { return new vis.module.LineChart(); },
-        PieChart: function() { return new vis.module.PieChart(); },
-        NetworkDiagram: function() { return new vis.module.NetworkDiagram(); },
-        CustomView: function() { return new vis.module.CustomView(); }
-    };
-
     Controller.prototype.createModule = function(name, x, y) {
-        var make = this._moduleMaker[name];
+        var make = vis.module.construct[name];
         if (!make) {
             console.warn('Module create failed: ' + name);
             return;
@@ -102,7 +90,7 @@ vis.control = (function(vis) {
 
     (function setup() {
         $(document).ready(function() {
-            $(document).on('contextmenu', function(e) { e.preventDefault(); });
+            // $(document).on('contextmenu', function(e) { e.preventDefault(); });
         });
     })();
 
@@ -118,7 +106,7 @@ vis.control = (function(vis) {
 })(vis);
 
 var c = vis.control.instance();
-c.createModule('DataSource', 400, 50);
-c.createModule('CustomView', 350, 250);
+// c.createModule('DataSource', 400, 50);
+// c.createModule('CustomView', 350, 250);
 // c.createModule('Scatterplot', 150, 250);
 // c.createModule('Scatterplot', 550, 250);

@@ -3,6 +3,9 @@ var vis = vis || {};
 vis.ui = (function(vis) {
     'use strict';
 
+    /**
+     * Mouse interactions.
+     */
     function draggable(widget, options) {
         options = options || {};
 
@@ -21,7 +24,7 @@ vis.ui = (function(vis) {
                 $(document).on('mousemove.vis-ui-drag', function(e) {
                     var dx = e.pageX - X0, dy = e.pageY - Y0;
                     var x = x0 + dx, y = y0 + dy;
-                    $(widget).css('left', x + 'px').css('top', y + 'px');
+                    $(widget).css('left', x).css('top', y);
 
                     if (options.drag) options.drag.call(widget); // Dragging callback.
                 });
@@ -35,6 +38,39 @@ vis.ui = (function(vis) {
                         if (options.end) options.end.call(widget); // Drag end callback.
                     }
                 });
+            }
+        });
+    }
+
+    function droppable(widget, options) {
+        options = options || {};
+
+        var counter = 0;
+
+        $(widget).on('drop.vis-ui-drop', function(e) {
+            var data = e.originalEvent.dataTransfer.getData('vis-ui-drop');
+
+            counter = 0;
+            $(widget).removeClass('vis-ui-dropping');
+            if (options.drop) options.drop.call(widget, data); // Drop callback.
+        });
+
+        $(widget).on('dragenter.vis-ui-drop', function(e) {
+            e.preventDefault();
+            counter++;
+            if (counter == 1) {
+                $(widget).addClass('vis-ui-dropping');
+            }
+        });
+
+        $(widget).on('dragover.vis-ui-drop', function(e) {
+            e.preventDefault();
+        });
+
+        $(widget).on('dragleave.vis-ui-drop', function(e) {
+            counter--;
+            if (counter == 0) {
+                $(widget).removeClass('vis-ui-dropping');
             }
         });
     }
@@ -181,9 +217,159 @@ vis.ui = (function(vis) {
         });
     }
 
+    /**
+     * UI functions.
+     */
+    function scrollable(widget, options) {
+        options = options || {};
+
+        $(widget).addClass('vis-ui-scrollable');
+        var scrollbar = new vis.ui.Scrollbar(widget, options);
+
+        $(widget).on('mousewheel', function(e) {
+            scrollbar.scroll(e.deltaY * e.deltaFactor);
+        });
+
+        return scrollbar;
+    }
+
+    /**
+     * UI elements.
+     */
+    var SubPanel = (function() {
+        function SubPanel(parent) {
+            if (!parent) return;
+            var panel = $('<div>').addClass('vis-ui-panel').appendTo(parent);
+            panel.on('mousedown', function(e) { e.stopPropagation(); });
+            this.panel = panel[0];
+            
+            this.scrollbar = vis.ui.scrollable(this.panel, {
+                position: 'bottom'
+            });
+        }
+
+        SubPanel.prototype.resize = function(x, y, w, h) {
+            $(this.panel).css({width: w, height: h, top: y, left: x});
+            this.scrollbar.resize();
+        };
+
+        SubPanel.prototype.toggle = function(flag) {
+            var p = $(this.panel);
+            if (flag === undefined) {
+                p.is(':visible') ? p.hide() : p.show();
+            } else {
+                flag ? p.show() : p.hide();
+            }
+        };
+
+        return SubPanel;
+    })();
+
+    var Scrollbar = (function() {
+        function Scrollbar(parent, options) {
+            if (!parent) return;
+            this.parent = parent;
+            this.options = options || {};
+
+            $(parent).wrapInner('<div class="vis-ui-scroll-content"></div>');
+            var content = $(parent).find(':first-child');
+            var container = $('<div>').addClass('vis-ui-scroll-container');
+            var bar = $('<div>').addClass('vis-ui-scroll-bar').appendTo(container);
+            $(parent).append(container);
+
+            this.container = container[0];
+            this.content = content[0];
+            this.bar = bar[0];
+
+            this.barWidth = 3;
+        }
+
+        Scrollbar.prototype.scroll = function(displacement) {
+            var $p = $(this.parent);
+            var w = $p.width(), h = $p.height();
+
+            var c = this.content;
+            var sw = c.scrollWidth, sh = c.scrollHeight;
+
+            var $cp = $(this.content).position();
+            var cx = $cp.left, cy = $cp.top;
+
+            var pos = this.options.position;
+            var f = this._scroll[pos];
+            if (f) f.call(this, w, h, sw, sh, cx, cy, displacement);
+        };
+
+        Scrollbar.prototype._scroll = {
+            top: function(w, h, sw, sh, cx, cy, d) {
+                var x = cx + d;
+                if (x > 0) x = 0;
+                if (x + sw < w) x = w - sw;
+                $(this.content).css('left', x);
+
+                var l = $(this.bar).width();
+                var percent = (w == sw) ? 0 : (x / (w - sw));
+                $(this.bar).css('left', (w - l) * percent);
+            },
+            left: function(w, h, sw, sh, cx, cy, d) {
+                var y = cy + d;
+                if (y > 0) y = 0;
+                if (y + sh < h) y = w - sh;
+                $(this.content).css('top', y);
+
+                var l = $(this.bar).height();
+                var percent = (h == sh) ? 0 : (y / (h - sh));
+                $(this.bar).css('top', (h - l) * percent);
+            },
+            bottom: function(w, h, sw, sh, cx, cy, d) { this._scroll.top.apply(this, arguments); },
+            right: function(w, h, sw, sh, cx, cy, d) { this._scroll.left.apply(this, arguments); }
+        };
+
+        Scrollbar.prototype.resize = function() {
+            $(this.content).css('top', 0).css('left', 0);
+
+            var p = this.parent, $p = $(this.parent);
+            var w = $p.width(), h = $p.height();
+
+            var pos = this.options.position;
+
+            var fc = this._resizeContainer[pos];
+            if (fc) fc.call(this, w, h);
+
+            var sw = p.scrollWidth || w, sh = p.scrollHeight || h;
+            var fb = this._resizeBar[pos];
+            if (fb) fb.call(this, w, h, sw, sh);
+        };
+
+        Scrollbar.prototype._resizeContainer = {
+            top:    function(w, h) { this._setSize(this.container, 0, 0, w, this.barWidth); },
+            bottom: function(w, h) { this._setSize(this.container, 0, h - this.barWidth, w, this.barWidth); },
+            left:   function(w, h) { this._setSize(this.container, 0, 0, this.barWidth, h); },
+            right:  function(w, h) { this._setSize(this.container, w - this.barWidth, 0, this.barWidth, h); }
+        };
+
+        Scrollbar.prototype._resizeBar = {
+            top:    function(w, h, sw, sh) { this._setSize(this.bar, 0, 0, w / sw * w, this.barWidth); },
+            bottom: function(w, h, sw, sh) { this._setSize(this.bar, 0, 0, w / sw * w, this.barWidth); },
+            left:   function(w, h, sw, sh) { this._setSize(this.bar, 0, 0, this.barWidth, h / sh * h); },
+            right:  function(w, h, sw, sh) { this._setSize(this.bar, 0, 0, this.barWidth, h / sh * h); }
+        };
+
+        Scrollbar.prototype._setSize = function(e, x, y, w, h) {
+            $(e).css({width: w, height: h, left: x, top: y});
+        };
+
+        return Scrollbar;
+    })();
+
     return {
         draggable: draggable,
+        droppable: droppable,
         resizable: resizable,
-        connectable: connectable
+        connectable: connectable,
+
+        scrollable: scrollable,
+
+        SubPanel: SubPanel,
+        Scrollbar: Scrollbar
     }
 })(vis);

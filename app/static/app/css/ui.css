@@ -9,6 +9,11 @@
     z-index: 100;
 }
 
+.vis-ui-dropping {
+    border-color: green;
+    z-index: 100;
+}
+
 .vis-ui-resizing {
     opacity: 0.8;
     border-color: red;
@@ -81,4 +86,31 @@
     height: 11px;
     left: -6px;
     top: -6px;
+}
+
+.vis-ui-scrollable {
+    overflow: hidden;
+}
+
+.vis-ui-scroll-content {
+    position: relative;
+}
+
+.vis-ui-scroll-container {
+    position: absolute;
+    background-color: lightgray;
+}
+
+.vis-ui-scroll-bar {
+    position: absolute;
+    background-color: black;
+}
+
+.vis-ui-panel {
+    cursor: auto;
+    position: absolute;
+    display: none;
+    background-color: rgb(242, 242, 242);
+    border: 1px solid lightgray;
+    z-index: 50;
 }

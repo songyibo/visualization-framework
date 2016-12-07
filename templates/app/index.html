@@ -12,6 +12,7 @@
     <link type="text/css" rel="stylesheet" href="{% static 'app/css/port.css' %}">
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
             <!-- Brand -->
@@ -55,22 +56,67 @@
         </div>
     </nav>
     <!-- Main Panel -->
-    <div class="container-fluid">
-        <div class="wrapper">
-            <svg id="vis-svg-canvas" width="1860" height="880">
-                <foreignObject id="vis-widget-canvas"></foreignObject>
-            </svg>
+    <div id="main-content">
+        <!-- Toolbox -->
+        <div id="toolbox" class="toolbox-container">
+            <div class="toolbox-content">
+                <h3>Toolbox</h3>
+                <div class="module-category">
+                    <h4>Data Module</h4>
+                    <div class="module-container">
+                        <div class="module-box" data-module="DataSource"><span>Source</span></div>
+                        <div class="module-box"><span>Table</span></div>
+                        <div class="module-box"><span></span></div>
+                    </div>
+                </div>
+                <div class="module-category">
+                    <h4>Visualization Module</h4>
+                    <div class="module-container">
+                        <div class="module-box" data-module="CustomView"><span>Custom</span></div>
+                        <div class="module-box" data-module="Scatterplot"><span>Scatter</span></div>
+                        <div class="module-box"><span>Parallel</span></div>
+                    </div>
+                </div>
+                <div class="module-category">
+                    <h4>Geometry Element</h4>
+                    <div class="module-container">
+                        <div class="module-box" draggable="true" data-element="axis"><span>Axis</span></div>
+                        <div class="module-box" draggable="true" data-element="circle"><span>Circle</span></div>
+                        <div class="module-box" draggable="true" data-element="rect"><span>Rect</span></div>
+                    </div>
+                </div>
+                <div class="module-category">
+                    <h4>Encoding Module</h4>
+                    <div class="module-container">
+                        <div class="module-box"><span>Color</span></div>
+                        <div class="module-box"><span>Size</span></div>
+                        <div class="module-box"><span>Label</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- SVG Canvas -->
+        <div class="container-fluid">
+            <div class="canvas-wrapper">
+                <svg id="vis-svg-canvas" width="1860" height="880">
+                    <foreignObject id="vis-widget-canvas"></foreignObject>
+                </svg>
+            </div>
         </div>
     </div>
     <script type="text/javascript" src="{% static 'app/frm/jquery-3.1.1/jquery-3.1.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/frm/bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/frm/d3-4.3.0/d3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'app/frm/jquery-mousewheel-3.1.13/jquery.mousewheel.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'app/js/index.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'app/js/svg.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/html.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/network.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/ui.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/module.js' %}"></script>
+    <script type="text/javascript" src="{% static 'app/js/element.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/port.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/control.js' %}"></script>
 </body>

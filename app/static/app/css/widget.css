@@ -17,6 +17,14 @@
     margin: 10px;
 }
 
+.vis-widget-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
 .vis-widget-select {
     display: inline-block;
     cursor: pointer;
@@ -32,4 +40,3 @@
     cursor: auto;
     margin: 10px;
 }
-
