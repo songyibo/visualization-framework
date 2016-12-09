@@ -19,8 +19,8 @@ vis.ui = (function(vis) {
 
                 var p = $(widget).position();
                 var X0 = e.pageX, Y0 = e.pageY;
-
                 var x0 = p.left, y0 = p.top;
+                
                 $(document).on('mousemove.vis-ui-drag', function(e) {
                     var dx = e.pageX - X0, dy = e.pageY - Y0;
                     var x = x0 + dx, y = y0 + dy;
@@ -242,11 +242,40 @@ vis.ui = (function(vis) {
             var panel = $('<div>').addClass('vis-ui-panel').appendTo(parent);
             panel.on('mousedown', function(e) { e.stopPropagation(); });
             this.panel = panel[0];
+
+            this.$tabHead = $('<ul>').addClass('vis-ui-tab-head').appendTo(panel);
+            this.$tabContent = $('<div>').addClass('vis-ui-tab-content').appendTo(panel);
+            this.$tabHead.on('click', 'li > a', function(e) {
+                e.preventDefault();
+                var wid = $(this).attr('href');
+                $(wid).parent().children().hide();
+                $(wid).show();
+            });
             
             this.scrollbar = vis.ui.scrollable(this.panel, {
                 position: 'bottom'
             });
+
+            this.tabs = [];
         }
+
+        SubPanel.prototype.addTab = function(options) {
+            options = options || {};
+
+            var item = $('<a>').attr('href', '#' + options.id).text(options.title);
+            this.$tabHead.append(item);
+            item.wrap('<li></li>');
+
+            var div = $('<div>').attr('id', options.id).addClass('vis-ui-tab-pane').hide();
+            div.append(options.content);
+            this.$tabContent.append(div);
+
+            if (!this.tabs) {
+
+            }
+
+            this.tabs.push({ id: options.id, head: item, pane: div });
+        };
 
         SubPanel.prototype.resize = function(x, y, w, h) {
             $(this.panel).css({width: w, height: h, top: y, left: x});
@@ -273,7 +302,7 @@ vis.ui = (function(vis) {
 
             $(parent).wrapInner('<div class="vis-ui-scroll-content"></div>');
             var content = $(parent).find(':first-child');
-            var container = $('<div>').addClass('vis-ui-scroll-container');
+            var container = $('<div>').addClass('vis-ui-scroll-container').hide();
             var bar = $('<div>').addClass('vis-ui-scroll-bar').appendTo(container);
             $(parent).append(container);
 
@@ -282,6 +311,10 @@ vis.ui = (function(vis) {
             this.bar = bar[0];
 
             this.barWidth = 3;
+
+            var $c = $(this.container);
+            $(this.parent).on('mouseenter.vis-ui-scrollbar', function() { $c.show(); });
+            $(this.parent).on('mouseleave.vis-ui-scrollbar', function() { $c.hide(); });
         }
 
         Scrollbar.prototype.scroll = function(displacement) {

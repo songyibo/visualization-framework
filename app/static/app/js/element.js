@@ -9,6 +9,10 @@ vis.element = (function(vis) {
             this.name = '';
         }
 
+        Element.prototype.interfaceBlocks = function() {
+            return [];
+        };
+
         return Element;
     })();
 
@@ -17,6 +21,8 @@ vis.element = (function(vis) {
             this.name = 'Axis';
         }
         AxisElement.prototype = Object.create(Element.prototype);
+
+        return AxisElement;
     })();
 
     var construct = {

@@ -29,7 +29,6 @@ vis.module = (function(vis) {
             if (!this.parent) return;
 
             this.widget = this._createWidget(this.parent);
-            this.elements = this._createElements(this.widget);
             this.ports = this._createPorts(this.widget);
 
             this._setDragAction(this.widget);
@@ -64,10 +63,6 @@ vis.module = (function(vis) {
         Module.prototype._createWidget = function(parent) {
             var div = $('<div>').addClass('vis-widget').appendTo(parent);
             return div[0];
-        };
-
-        Module.prototype._createElements = function(parent) {
-            return {};
         };
 
         Module.prototype._createPorts = function(widget) {
@@ -318,6 +313,7 @@ vis.module = (function(vis) {
         CustomViewModule.prototype.init = function(parent, position) {
             Module.prototype.init.apply(this, arguments);
             this._setDropAction(this.widget);
+
             var $this = this;
             $(this.button).on('click', function(e) {
                 e.stopPropagation();
@@ -336,12 +332,20 @@ vis.module = (function(vis) {
 
             var element = make();
             if (element) {
+                var idx = this.elements.length;
+                var id = this.label + '_' + element.name + '_' + idx;
+
                 this.elements.push({
-                    name: element.name + this.elements.length                   
+                    id: id,
+                    element: element
+                });
+
+                this.panel.addTab({
+                    id: id,
+                    title: element.name + '_' + idx,
+                    content: element.interfaceBlocks()
                 });
             }
-            // TODO: Interface add logic.
-            this.elements[element.name] = element;
         };
 
         CustomViewModule.prototype.updateComponents = function() {

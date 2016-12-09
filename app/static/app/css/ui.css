@@ -103,7 +103,7 @@
 
 .vis-ui-scroll-bar {
     position: absolute;
-    background-color: black;
+    background-color: rgb(65, 65, 65);
 }
 
 .vis-ui-panel {
@@ -113,4 +113,32 @@
     background-color: rgb(242, 242, 242);
     border: 1px solid lightgray;
     z-index: 50;
+    text-align: initial;
+}
+
+.vis-ui-tab-head {
+    padding: 1px;
+    margin: 0;
+}
+
+.vis-ui-tab-head > li > a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.vis-ui-tab-head > li {
+    display: inline-block;
+    line-height: 22px;
+    list-style-type: none;
+    background-color: rgb(250, 250, 250);
+    margin: 0 2px;
+}
+
+.vis-ui-tab-head > li.active {
+    background-color: #428bca;
+}
+
+.vis-ui-tab-head > li.active > a {
+    color: white;
 }

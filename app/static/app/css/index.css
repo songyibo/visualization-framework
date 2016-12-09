@@ -4,6 +4,9 @@ nav {
 
 #vis-svg-canvas {
     margin: auto;
+}
+
+#vis-widget-canvas {
     position: relative;
 }
 
