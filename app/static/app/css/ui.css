@@ -1,0 +1,144 @@
+.vis-ui-connecting {
+    border-color: blue;
+}
+
+.vis-ui-dragging {
+    cursor: move;
+    opacity: 0.8;
+    border-color: black;
+    z-index: 100;
+}
+
+.vis-ui-dropping {
+    border-color: green;
+    z-index: 100;
+}
+
+.vis-ui-resizing {
+    opacity: 0.8;
+    border-color: red;
+    z-index: 100;
+}
+
+.vis-ui-resize-handle {
+    position: absolute;
+}
+
+.vis-ui-resize-n {
+    cursor: n-resize;
+    height: 7px;
+    width: 100%;
+    top: -5px;
+    left: 0;
+}
+
+.vis-ui-resize-e {
+    cursor: e-resize;
+    width: 7px;
+    height: 100%;
+    right: -5px;
+    top: 0;
+}
+
+.vis-ui-resize-s {
+    cursor: s-resize;
+    height: 7px;
+    width: 100%;
+    bottom: -5px;
+    left: 0;
+}
+
+.vis-ui-resize-w {
+    cursor: w-resize;
+    width: 7px;
+    height: 100%;
+    left: -5px;
+    top: 0;
+}
+
+.vis-ui-resize-se {
+    cursor: se-resize;
+    width: 11px;
+    height: 11px;
+    right: -6px;
+    bottom: -6px;
+}
+
+.vis-ui-resize-sw {
+    cursor: sw-resize;
+    width: 11px;
+    height: 11px;
+    left: -6px;
+    bottom: -6px;
+}
+
+.vis-ui-resize-ne {
+    cursor: ne-resize;
+    width: 11px;
+    height: 11px;
+    right: -6px;
+    top: -6px;
+}
+
+.vis-ui-resize-nw {
+    cursor: nw-resize;
+    width: 11px;
+    height: 11px;
+    left: -6px;
+    top: -6px;
+}
+
+.vis-ui-scrollable {
+    overflow: hidden;
+}
+
+.vis-ui-scroll-content {
+    position: relative;
+}
+
+.vis-ui-scroll-container {
+    position: absolute;
+    background-color: lightgray;
+}
+
+.vis-ui-scroll-bar {
+    position: absolute;
+    background-color: rgb(65, 65, 65);
+}
+
+.vis-ui-panel {
+    cursor: auto;
+    position: absolute;
+    display: none;
+    background-color: rgb(242, 242, 242);
+    border: 1px solid lightgray;
+    z-index: 50;
+    text-align: initial;
+}
+
+.vis-ui-tab-head {
+    padding: 1px;
+    margin: 0;
+}
+
+.vis-ui-tab-head > li > a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.vis-ui-tab-head > li {
+    display: inline-block;
+    line-height: 22px;
+    list-style-type: none;
+    background-color: rgb(250, 250, 250);
+    margin: 0 2px;
+}
+
+.vis-ui-tab-head > li.active {
+    background-color: #428bca;
+}
+
+.vis-ui-tab-head > li.active > a {
+    color: white;
+}
