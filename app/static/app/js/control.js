@@ -6,6 +6,8 @@ vis.control = (function(vis) {
         this.widgetCanvas = 'vis-widget-canvas';
         this.svgCanvas = 'vis-svg-canvas';
 
+        this.$panel = $('.side-panel-content');
+
         this.datasets = {};
         this.modules = [];
     }
@@ -82,6 +84,20 @@ vis.control = (function(vis) {
         }
     };
 
+    Controller.prototype.setPanel = function(name) {
+        name = name || 'main';
+
+        var exist = $('#vis-panel-' + name);
+        this.$panel.children().hide();
+        if (exist.get(0)) {
+            exist.show();
+        } else {
+            var panelHtml = $('#vis-template-' + name).html();
+            var tab = $('<div>').attr('id', 'vis-panel-' + name).html(panelHtml);
+            this.$panel.append(tab);
+        }
+    };
+
     var controller = null;
 
     function createController() {
@@ -90,7 +106,21 @@ vis.control = (function(vis) {
 
     (function setup() {
         $(document).ready(function() {
+            var control = vis.control.instance();
+
             // $(document).on('contextmenu', function(e) { e.preventDefault(); });
+
+            $(document).on('click', '.side-panel-box', function(e) {
+                e.stopPropagation();
+                var m = $(this).attr('data-module');
+                if (m) {
+                    var $c = $('#' + control.svgCanvas);
+                    var w = $c.width(), h = $c.height();
+                    vis.control.instance().createModule(m, w / 3, h / 3);
+                }
+            });
+
+            vis.control.instance().setPanel();
         });
     })();
 
@@ -106,7 +136,3 @@ vis.control = (function(vis) {
 })(vis);
 
 var c = vis.control.instance();
-// c.createModule('DataSource', 400, 50);
-// c.createModule('CustomView', 350, 250);
-// c.createModule('Scatterplot', 150, 250);
-// c.createModule('Scatterplot', 550, 250);

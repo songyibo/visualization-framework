@@ -21,33 +21,7 @@
             </div>
             <!-- Menu -->
             <div class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Data<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Data Source</a></li>
-                            <li><a href="#">Data Table</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Plots<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Scatterplot</a></li>
-                            <li><a href="#">Parallel Coordinates</a></li>
-                            <li><a href="#">Bar Chart</a></li>
-                            <li><a href="#">Line Chart</a></li>
-                            <li><a href="#">Pie Chart</a></li>
-                            <li><a href="#">Network Diagram</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Style<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Color</a></li>
-                            <li><a href="#">Size</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                <ul class="nav navbar-nav"></ul>
                 <!-- User Infomation -->
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#">Log In</a></li>
@@ -55,61 +29,31 @@
             </div>
         </div>
     </nav>
-    <!-- Main Panel -->
+    <!-- Main Content -->
     <div id="main-content">
-        <!-- Toolbox -->
-        <div id="toolbox" class="toolbox-container">
-            <div class="toolbox-content">
-                <h3>Toolbox</h3>
-                <div class="module-category">
-                    <h4>Data Module</h4>
-                    <div class="module-container">
-                        <div class="module-box" data-module="DataSource"><span>Source</span></div>
-                        <div class="module-box"><span>Table</span></div>
-                        <div class="module-box"><span></span></div>
-                    </div>
-                </div>
-                <div class="module-category">
-                    <h4>Visualization Module</h4>
-                    <div class="module-container">
-                        <div class="module-box" data-module="CustomView"><span>Custom</span></div>
-                        <div class="module-box" data-module="Scatterplot"><span>Scatter</span></div>
-                        <div class="module-box"><span>Parallel</span></div>
-                    </div>
-                </div>
-                <div class="module-category">
-                    <h4>Geometry Element</h4>
-                    <div class="module-container">
-                        <div class="module-box" draggable="true" data-element="axis"><span>Axis</span></div>
-                        <div class="module-box" draggable="true" data-element="circle"><span>Circle</span></div>
-                        <div class="module-box" draggable="true" data-element="rect"><span>Rect</span></div>
-                    </div>
-                </div>
-                <div class="module-category">
-                    <h4>Encoding Module</h4>
-                    <div class="module-container">
-                        <div class="module-box"><span>Color</span></div>
-                        <div class="module-box"><span>Size</span></div>
-                        <div class="module-box"><span>Label</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- SVG Canvas -->
         <div class="container-fluid">
-            <div class="canvas-wrapper">
-                <svg id="vis-svg-canvas" width="1860" height="880">
-                    <foreignObject>
-                        <div id="vis-widget-canvas"></div>
-                    </foreignObject>
-                </svg>
+            <div class="row">
+                <!-- Side Panel -->
+                <div class="col-md-2">
+                    <div class="side-panel">
+                        <h3>Elements & Interfaces</h3>
+                        <div class="side-panel-content"><!-- Module panel --></div>
+                    </div>
+                </div>
+                <!-- SVG Canvas -->
+                <div class="col-md-10">
+                    <svg id="vis-svg-canvas" width="1560" height="880">
+                        <foreignObject>
+                            <div id="vis-widget-canvas"></div>
+                        </foreignObject>
+                    </svg>
+                </div>
             </div>
         </div>
     </div>
     <script type="text/javascript" src="{% static 'app/frm/jquery-3.1.1/jquery-3.1.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/frm/bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/frm/d3-4.3.0/d3.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'app/frm/jquery-mousewheel-3.1.13/jquery.mousewheel.min.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'app/js/index.js' %}"></script>
 
@@ -119,7 +63,10 @@
     <script type="text/javascript" src="{% static 'app/js/ui.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/module.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/element.js' %}"></script>
-    <script type="text/javascript" src="{% static 'app/js/port.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/control.js' %}"></script>
+    <script type="text/javascript" src="{% static 'app/js/port.js' %}"></script>
+
+    <script id="vis-template-main" type="text/html">{% include 'app/panels/main.html' %}</script>
+    <script id="vis-template-scatterplot" type="text/html">{% include 'app/panels/scatterplot.html' %}</script>
 </body>
 </html>

@@ -6,6 +6,39 @@ vis.ui = (function(vis) {
     /**
      * Mouse interactions.
      */
+    var selectIndex = 0; // Distinguish different unselect handlers.
+    function selectable(widget, options) {
+        options = options || {};
+
+        var index = selectIndex++;
+        var selected = false;
+        $(widget).on('mousedown.vis-ui-select', function(e) {
+            if (e.which == 1) {
+                if (selected) return;
+                e.preventDefault();
+                e.stopPropagation();
+
+                selected = true;
+                $(widget).addClass('vis-ui-selected');
+                if (options.select) options.select.call(widget);
+
+                $(document).on('mousedown.vis-ui-select' + index, function(e, i) {
+                    if (e.which == 1 || i != index) {
+                        // Unbind its own handler.
+                        $(document).off('mousedown.vis-ui-select' + index);
+
+                        selected = false;
+                        $(widget).removeClass('vis-ui-selected');
+                        if (options.cancel) options.cancel.call(widget);
+                    }
+                });
+
+                // Unselect other selectable objects.
+                $(document).triggerHandler('mousedown', index);
+            }
+        });
+    }
+
     function draggable(widget, options) {
         options = options || {};
 
@@ -395,6 +428,7 @@ vis.ui = (function(vis) {
     })();
 
     return {
+        selectable: selectable,
         draggable: draggable,
         droppable: droppable,
         resizable: resizable,
