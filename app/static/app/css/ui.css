@@ -1,3 +1,7 @@
+.vis-ui-selected {
+    border: 1px solid black;
+}
+
 .vis-ui-connecting {
     border-color: blue;
 }

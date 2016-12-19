@@ -9,6 +9,7 @@ vis.module = (function(vis) {
          */
         function Module() {
             this.name = 'Module';
+            this.identifier = 'module';
 
             this.x = 100; this.y = 100;
             this.w = 200; this.h = 200;
@@ -31,9 +32,9 @@ vis.module = (function(vis) {
             this.widget = this._createWidget(this.parent);
             this.ports = this._createPorts(this.widget);
 
+            this._setSelectAction(this.widget);
             this._setDragAction(this.widget);
             this._setResizeAction(this.widget);
-            this._setConnectAction(this.widget);
 
             this.updateSize();
             this.updateComponents();
@@ -71,13 +72,20 @@ vis.module = (function(vis) {
 
         Module.prototype._resizePorts = function() {};
 
-        Module.prototype._setDragAction = function(widget) {
+        Module.prototype._setSelectAction = function(widget) {
             var $this = this;
-            vis.ui.draggable(widget, {
-                start: function() {},
-                drag: function() {},
-                end: function() {}
+            vis.ui.selectable(widget, {
+                select: function() {
+                    vis.control.instance().setPanel($this.identifier);
+                },
+                cancel: function() {
+                    vis.control.instance().setPanel();
+                }
             });
+        };
+
+        Module.prototype._setDragAction = function(widget) {
+            vis.ui.draggable(widget);
         };
 
         Module.prototype._setResizeAction = function(widget) {
@@ -88,33 +96,11 @@ vis.module = (function(vis) {
                 maxWidth: this.wMax,
                 maxHeight: this.hMax,
 
-                start: function() {},
                 resize: function(pos) {
                     if (pos) {
                         $this.setSize(pos.x, pos.y, pos.w, pos.h);
                     }
                     $this.updateComponents();
-                },
-                end: function() {}
-            });
-        };
-
-        Module.prototype._setConnectAction = function(widget) {
-            var $this = this;
-            vis.ui.connectable(widget, {
-                start: function() {
-                    // Record this source data widget.
-                    vis.control.instance().setConnectSource($this);
-                },
-                connect: function(x, y) {
-                    // TODO: Invoke to draw pending connection.
-                    // vis.control.instance().updateCurve();
-                },
-                end: function() {
-                    // Record the widget where dragging ends.
-                    vis.control.instance().setConnectTarget($this);
-                    // TODO: Invoke to draw final connection.
-                    vis.control.instance().connect();
                 }
             });
         };
@@ -219,6 +205,8 @@ vis.module = (function(vis) {
             this.name = 'Scatterplot';
             this.index = ScatterplotModule.prototype.counter++;
             this.label = this.name + '_' + this.index;
+
+            this.identifier = 'scatterplot';
 
             this.type = 'view';
         }
