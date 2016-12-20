@@ -10,6 +10,10 @@ vis.control = (function(vis) {
 
         this.datasets = {};
         this.modules = [];
+
+        this.pendingLine = d3.select('#' + this.svgCanvas).append('line')
+            .attr('class', 'vis-svg-pending')
+            .style('stroke', 'black');
     }
 
     Controller.prototype.hasDataset = function(dataset) {
@@ -33,6 +37,16 @@ vis.control = (function(vis) {
             var ds = this.datasets[dataset];
             $this._updateDataSources(ds.name, ds.columns.map(function(c) { return c.name; }));
         }
+    };
+
+    Controller.prototype.drawPendingConnection = function(x1, y1, x2, y2) {
+        var c = vis.control.instance();
+        c.pendingLine.attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+    };
+
+    Controller.prototype.clearPendingConnection = function() {
+        var c = vis.control.instance();
+        c.pendingLine.attr('x1', '').attr('y1', '').attr('x2', '').attr('y2', '');
     };
 
     Controller.prototype.setConnectSource = function(source) {
