@@ -2,30 +2,8 @@
     position: absolute;
     cursor: pointer;
     background-color: rgb(232, 232, 232);
-    border-color: 1px solid lightgray;
+    border: 1px solid lightgray;
 }
 
 .vis-port-container {
-    position: absolute;
-}
-
-.vis-port-data {
-	position: absolute;
-	cursor: pointer;
-	background-color: rgb(242, 242, 242);
-}
-
-.vis-port-data-item {
-	font-size: 15px;
-	line-height: 20px;
-	text-align: center;
-	min-width: 50px;
-	display: inline-block;
-	padding: 2px 4px;
-	border: 1px solid lightgray;
-	z-index: 100;
-}
-
-.vis-port-dragging {
-	border-color: blue;
 }

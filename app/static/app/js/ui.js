@@ -210,6 +210,7 @@ vis.ui = (function(vis) {
 
                     isSource = false;
                     $(widget).removeClass('vis-ui-connecting');
+                    if (options.cancel) options.cancel.call(widget); // Connect cancel callback outside the widget.
                 });
             }
         });

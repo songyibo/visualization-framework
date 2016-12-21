@@ -9,7 +9,7 @@ vis.module = (function(vis) {
          */
         function Module() {
             this.name = 'Module';
-            this.identifier = 'module';
+            this.templateName = 'module';
 
             this.x = 100; this.y = 100;
             this.w = 200; this.h = 200;
@@ -31,6 +31,7 @@ vis.module = (function(vis) {
 
             this.widget = this._createWidget(this.parent);
             this.ports = this._createPorts(this.widget);
+            this._registerPorts();
 
             this._setSelectAction(this.widget);
             this._setDragAction(this.widget);
@@ -38,6 +39,7 @@ vis.module = (function(vis) {
 
             this.updateSize();
             this.updateComponents();
+
             return this;
         };
 
@@ -61,22 +63,55 @@ vis.module = (function(vis) {
             this._resizePorts();
         };
 
+        Module.prototype.addPort = function(name, type) {
+            var p = new vis.port.Port(this, this.portContainer, name, type);
+            this.ports[type].push(p);
+        };
+
         Module.prototype._createWidget = function(parent) {
             var div = $('<div>').addClass('vis-widget').appendTo(parent);
             return div[0];
         };
 
         Module.prototype._createPorts = function(widget) {
-            return {};
+            var container = $('<div>').addClass('vis-port-container').appendTo(widget);
+            this.portContainer = container[0];
+            return {
+                input: [],
+                output: []
+            };
         };
 
-        Module.prototype._resizePorts = function() {};
+        Module.prototype._registerPorts = function() {
+            this.addPort('xAxis', 'input');
+            this.addPort('yAxis', 'input');
+        };
+
+        Module.prototype._resizePorts = function() {
+            var s = 20, m = 5, l = this.h;
+            var ip = this.ports.input, op = this.ports.output;
+
+            var num1 = ip.length;
+            var t1 = num1 * s + (num1 - 1) * m;
+            var x1 = -(m + s), y1 = (l - t1) / 2;
+            for (var i in ip) {
+                var p = ip[i];
+                p.resize({x: x1, y: i * (m + s) + y1, w: s, h: s});
+            }
+
+            var num2 = op.length;
+            var t2 = num2 * s + (num2 - 1) * m;
+            var x2 = 0, y2 = (l - t2) / 2;
+            for (var o in op) {
+                op[o].resize({x: x2, y: o * (m + s) + y2, w: s, h: s});
+            }
+        };
 
         Module.prototype._setSelectAction = function(widget) {
             var $this = this;
             vis.ui.selectable(widget, {
                 select: function() {
-                    vis.control.instance().setPanel($this.identifier);
+                    vis.control.instance().setPanel($this.templateName);
                 },
                 cancel: function() {
                     vis.control.instance().setPanel();
@@ -206,7 +241,7 @@ vis.module = (function(vis) {
             this.index = ScatterplotModule.prototype.counter++;
             this.label = this.name + '_' + this.index;
 
-            this.identifier = 'scatterplot';
+            this.templateName = 'scatterplot';
 
             this.type = 'view';
         }
@@ -255,26 +290,6 @@ vis.module = (function(vis) {
             this.svg = new vis.svg.Scatterplot(container.attr('id'));
 
             return widget;
-        };
-
-        ScatterplotModule.prototype._createPorts = function(widget) {
-            var container = $('<div>').addClass('vis-port-container');
-            $(widget).append(container);
-            this.portContainer = container[0];
-
-            var p1 = new vis.port.AxisInput(this.portContainer);
-            var p2 = new vis.port.ShapeInput(this.portContainer);
-            var p3 = new vis.port.SelectionInput(this.portContainer);
-            var p4 = new vis.port.SelectionOutput(this.portContainer);
-
-            return { axis: p1, shape: p2, sin: p3, sout: p4 };
-        };
-
-        ScatterplotModule.prototype._resizePorts = function() {
-            this.ports.axis.resize({x: 0, y: 0, w: this.w, h: this.h});
-            this.ports.shape.resize({x: 0, y: 0, w: this.w, h: this.h});
-            this.ports.sin.resize({x: 0, y: 0, w: this.w, h: this.h});
-            this.ports.sout.resize({x: 0, y: 0, w: this.w, h: this.h});
         };
 
         return ScatterplotModule;
