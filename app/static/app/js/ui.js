@@ -59,7 +59,7 @@ vis.ui = (function(vis) {
                     var x = x0 + dx, y = y0 + dy;
                     $(widget).css('left', x).css('top', y);
 
-                    if (options.drag) options.drag.call(widget); // Dragging callback.
+                    if (options.drag) options.drag.call(widget, x, y); // Dragging callback.
                 });
 
                 $(widget).on('mouseup.vis-ui-drag', function(e) {
@@ -160,9 +160,9 @@ vis.ui = (function(vis) {
                     pos.w = (pos.w > wMax) ? wMax : pos.w;
                     pos.h = (pos.h > hMax) ? hMax : pos.h;
 
-                    $(widget).css({ left: pos.x, top: pos.y, width: pos.w, height: pos.h });
+                    $(widget).css({left: pos.x, top: pos.y, width: pos.w, height: pos.h});
 
-                    if (options.resize) options.resize.call(widget, pos); // Resizing callback.
+                    if (options.resize) options.resize.call(widget, pos.x, pos.y, pos.w, pos.h); // Resizing callback.
                 });
 
                 // This event cannot be bound at the handle elements.

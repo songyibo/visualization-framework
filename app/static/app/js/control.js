@@ -9,11 +9,9 @@ vis.control = (function(vis) {
         this.$panel = $('.side-panel-content');
 
         this.datasets = {};
-        this.modules = [];
+        this.modules = {};
 
-        this.pendingLine = d3.select('#' + this.svgCanvas).append('line')
-            .attr('class', 'vis-svg-pending')
-            .style('stroke', 'black');
+        this.canvasManager = new vis.svg.CanvasManager(this.svgCanvas);
     }
 
     Controller.prototype.hasDataset = function(dataset) {
@@ -40,13 +38,15 @@ vis.control = (function(vis) {
     };
 
     Controller.prototype.drawPendingConnection = function(x1, y1, x2, y2) {
-        var c = vis.control.instance();
-        c.pendingLine.attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+        this.canvasManager.drawLine(x1, y1, x2, y2);
     };
 
     Controller.prototype.clearPendingConnection = function() {
-        var c = vis.control.instance();
-        c.pendingLine.attr('x1', '').attr('y1', '').attr('x2', '').attr('y2', '');
+        this.canvasManager.resetLine();
+    };
+
+    Controller.prototype.drawConnection = function(portStart, portEnd) {
+
     };
 
     Controller.prototype.setConnectSource = function(source) {
@@ -87,14 +87,14 @@ vis.control = (function(vis) {
     Controller.prototype.createModule = function(name, x, y) {
         var make = vis.module.construct[name];
         if (!make) {
-            console.warn('Module create failed: ' + name);
+            console.warn('Module creation failed: ' + name);
             return;
         }
 
         var module = make();
         if (module) {
             module.init(this.widgetCanvas, {x: x, y: y});
-            this.modules.push(module);
+            this.modules[module.id] = module;
         }
     };
 
@@ -130,11 +130,11 @@ vis.control = (function(vis) {
                 if (m) {
                     var $c = $('#' + control.svgCanvas);
                     var w = $c.width(), h = $c.height();
-                    vis.control.instance().createModule(m, w / 3, h / 3);
+                    control.createModule(m, w / 3, h / 3);
                 }
             });
 
-            vis.control.instance().setPanel();
+            control.setPanel();
         });
     })();
 

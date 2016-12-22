@@ -8,55 +8,37 @@ vis.module = (function(vis) {
          * Module Base Class
          */
         function Module() {
-            this.name = 'Module';
-            this.templateName = 'module';
+            this.name = 'module';
+            this.displayName = 'Module';
+            this.templateName = '';
+            this.id = '';
 
-            this.x = 100; this.y = 100;
-            this.w = 200; this.h = 200;
-            this.wMin = 100; this.hMin = 100;
-            this.wMax = 2000; this.hMax = 1000;
+            this.widget = null;
+            this.panel = null;
+            this.ports = null;
         }
 
-        Module.prototype.init = function(parent, position) {
-            this.parent = document.getElementById(parent) || null;
-            
-            if (position) {
-                this.x = position.x || this.x;
-                this.y = position.y || this.y;
-                this.w = position.w || this.w;
-                this.h = position.h || this.h;
+        Module.prototype.init = function(canvasID, position) {
+            if (this.widget) {
+                this.widget.init(canvasID, position);
+                this.widget.update();
             }
+            if (this.panel) {
 
-            if (!this.parent) return;
+            }
+            if (this.ports) {
 
-            this.widget = this._createWidget(this.parent);
-            this.ports = this._createPorts(this.widget);
-            this._registerPorts();
-
-            this._setSelectAction(this.widget);
-            this._setDragAction(this.widget);
-            this._setResizeAction(this.widget);
-
-            this.updateSize();
-            this.updateComponents();
-
+            }
             return this;
         };
 
-        Module.prototype.setSize = function(x, y, w, h) {
-            if (x) this.x = x;
-            if (y) this.y = y;
-            if (w) this.w = w;
-            if (h) this.h = h;
+        Module.prototype.select = function() {
+            // vis.control.instance().setSelectedModule($this);
+            vis.control.instance().setPanel(this.templateName);
         };
 
-        Module.prototype.updateSize = function() {
-            $(this.widget).css({
-                left: this.x,
-                top: this.y,
-                width: this.w,
-                height: this.h
-            });
+        Module.prototype.unselect = function() {
+            vis.control.instance().setPanel();
         };
 
         Module.prototype.updateComponents = function() {
@@ -66,11 +48,6 @@ vis.module = (function(vis) {
         Module.prototype.addPort = function(name, type) {
             var p = new vis.port.Port(this, this.portContainer, name, type);
             this.ports[type].push(p);
-        };
-
-        Module.prototype._createWidget = function(parent) {
-            var div = $('<div>').addClass('vis-widget').appendTo(parent);
-            return div[0];
         };
 
         Module.prototype._createPorts = function(widget) {
@@ -105,39 +82,6 @@ vis.module = (function(vis) {
             for (var o in op) {
                 op[o].resize({x: x2, y: o * (m + s) + y2, w: s, h: s});
             }
-        };
-
-        Module.prototype._setSelectAction = function(widget) {
-            var $this = this;
-            vis.ui.selectable(widget, {
-                select: function() {
-                    vis.control.instance().setPanel($this.templateName);
-                },
-                cancel: function() {
-                    vis.control.instance().setPanel();
-                }
-            });
-        };
-
-        Module.prototype._setDragAction = function(widget) {
-            vis.ui.draggable(widget);
-        };
-
-        Module.prototype._setResizeAction = function(widget) {
-            var $this = this;
-            vis.ui.resizable(widget, {
-                minWidth: this.wMin,
-                minHeight: this.hMin,
-                maxWidth: this.wMax,
-                maxHeight: this.hMax,
-
-                resize: function(pos) {
-                    if (pos) {
-                        $this.setSize(pos.x, pos.y, pos.w, pos.h);
-                    }
-                    $this.updateComponents();
-                }
-            });
         };
 
         return Module;
@@ -227,39 +171,35 @@ vis.module = (function(vis) {
         return DataSourceModule;
     })();
 
-    var ScatterplotModule = (function() {
+    var ScatterPlotModule = (function() {
         /**
-         * Scatterplot Module
+         * ScatterPlot Module
          */
-        function ScatterplotModule() {
+        function ScatterPlotModule() {
             Module.call(this);
 
-            this.w = 300; this.h = 300;
-            this.wMin = 200; this.hMin = 200;
+            this.name = 'scatter-plot';
+            this.displayName = 'Scatter Plot';
+            this.templateName = 'scatter';
 
-            this.name = 'Scatterplot';
-            this.index = ScatterplotModule.prototype.counter++;
-            this.label = this.name + '_' + this.index;
+            this.index = ScatterPlotModule.prototype.counter++;
+            this.id = this.name + '-' + this.index;
+            this.label = this.displayName + ' ' + this.index;
 
-            this.templateName = 'scatterplot';
-
-            this.type = 'view';
+            this.widget = new vis.widget.SvgWidget(this);
+            // this.ports = new vis.port.PortManager(this);
+            // this.panel = new vis.panel.Panel(this);
         }
-        ScatterplotModule.prototype = Object.create(Module.prototype);
+        ScatterPlotModule.prototype = Object.create(Module.prototype);
+        ScatterPlotModule.prototype.counter = 1;
 
-        ScatterplotModule.prototype.updateComponents = function() {
-            Module.prototype.updateComponents.call(this);
-            this.svg.resize(this.w - 22, this.h - 60);
-        };
-
-        ScatterplotModule.prototype.setAxisInput = function(data, dataset, key) {
+        ScatterPlotModule.prototype.setAxisInput = function(data, dataset, key) {
             if (this.dataset != dataset) {
                 this.dataset = dataset;
                 this.xAxis = '';
             }
 
             this.data = data;
-
             if (this.yAxis) {
                 this.xAxis = this.yAxis;
                 this.yAxis = key;
@@ -279,20 +219,7 @@ vis.module = (function(vis) {
             }
         };
 
-        ScatterplotModule.prototype.counter = 1;
-
-        ScatterplotModule.prototype._createWidget = function(parent) {
-            var widget = Module.prototype._createWidget.apply(this, arguments);
-
-            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(widget);
-            var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
-            var container = $('<div>', {id: 'vis-widget-scatterplot-' + this.index, class: 'vis-widget-container'}).appendTo(widget);
-            this.svg = new vis.svg.Scatterplot(container.attr('id'));
-
-            return widget;
-        };
-
-        return ScatterplotModule;
+        return ScatterPlotModule;
     })();
 
     var CustomViewModule = (function() {
@@ -388,18 +315,18 @@ vis.module = (function(vis) {
     })();
 
     var construct = {
-        DataSource: function() { return new DataSourceModule(); },
+        'data-source': function() { return new DataSourceModule(); },
         
-        CustomView: function() { return new CustomViewModule(); },
-        Scatterplot: function() { return new ScatterplotModule(); }
+        'custom-view': function() { return new CustomViewModule(); },
+        'scatter-plot': function() { return new ScatterPlotModule(); }
     };
-
+ 
     return {
-        construct: construct,
-
         DataSource: DataSourceModule,
-        Scatterplot: ScatterplotModule,
-        CustomView: CustomViewModule
+        ScatterPlot: ScatterPlotModule,
+        CustomView: CustomViewModule,
+
+        construct: construct
     };
     
 })(vis);
