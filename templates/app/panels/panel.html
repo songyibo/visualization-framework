@@ -1,0 +1,27 @@
+{% verbatim %}
+<div id="{{ id }}">
+    <h3>Module Elements</h3>
+    <div class="side-panel-content">
+        {{ #elements }}
+        <div class="side-panel-category">
+            <div class="side-panel-heading">
+                <h4>{{ text }}</h4>
+            </div>
+            <div class="side-panel-body">
+                {{ #attribs }}
+                <div class="side-panel-box" data-name="{{ name }}">
+                    <span>{{ text }}</span>
+                </div>
+                {{ /attribs }}
+                {{ ^attribs }}
+                There is no available ports for this element.
+                {{ /attribs }}
+            </div>
+        </div>
+        {{ /elements }}
+        {{ #custom }}
+        Custom module element addition here.
+        {{ /custom }}
+    </div>
+</div>
+{% endverbatim %}

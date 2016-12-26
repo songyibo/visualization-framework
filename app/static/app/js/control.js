@@ -6,7 +6,7 @@ vis.control = (function(vis) {
         this.widgetCanvas = 'vis-widget-canvas';
         this.svgCanvas = 'vis-svg-canvas';
 
-        this.$panel = $('.side-panel-content');
+        this.panel = $('.side-panel').get(0);
 
         this.datasets = {};
         this.modules = {};
@@ -98,18 +98,9 @@ vis.control = (function(vis) {
         }
     };
 
-    Controller.prototype.setPanel = function(name) {
-        name = name || 'main';
-
-        var exist = $('#vis-panel-' + name);
-        this.$panel.children().hide();
-        if (exist.get(0)) {
-            exist.show();
-        } else {
-            var panelHtml = $('#vis-template-' + name).html();
-            var tab = $('<div>').attr('id', 'vis-panel-' + name).html(panelHtml);
-            this.$panel.append(tab);
-        }
+    Controller.prototype.setPanel = function(panel) {
+        var html = panel ? panel.getHtml() : $('#vis-template-main').html();
+        $(this.panel).html(html);
     };
 
     var controller = null;
@@ -124,7 +115,7 @@ vis.control = (function(vis) {
 
             // $(document).on('contextmenu', function(e) { e.preventDefault(); });
 
-            $(document).on('click', '.side-panel-box', function(e) {
+            $('.side-panel').on('click', '.side-panel-box', function(e) {
                 e.stopPropagation();
                 var m = $(this).attr('data-module');
                 if (m) {

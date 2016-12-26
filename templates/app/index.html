@@ -36,8 +36,7 @@
                 <!-- Side Panel -->
                 <div class="col-md-2">
                     <div class="side-panel">
-                        <h3>Elements & Interfaces</h3>
-                        <div class="side-panel-content"><!-- Module panel --></div>
+                        <!-- Module & Element Panel -->
                     </div>
                 </div>
                 <!-- SVG Canvas -->
@@ -62,6 +61,7 @@
     <script type="text/javascript" src="{% static 'app/js/html.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/network.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/ui.js' %}"></script>
+    <script type="text/javascript" src="{% static 'app/js/panel.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/module.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/widget.js' %}"></script>
     <script type="text/javascript" src="{% static 'app/js/element.js' %}"></script>
@@ -70,5 +70,6 @@
 
     <script id="vis-template-main" type="text/html">{% include 'app/panels/main.html' %}</script>
     <script id="vis-template-scatter" type="text/html">{% include 'app/panels/scatter.html' %}</script>
+    <script id="vis-template-panel" type="text/html">{% include 'app/panels/panel.html' %}</script>
 </body>
 </html>

@@ -10,7 +10,7 @@ vis.module = (function(vis) {
         function Module() {
             this.name = 'module';
             this.displayName = 'Module';
-            this.templateName = '';
+            this.templateName = 'panel';
             this.id = '';
 
             this.widget = null;
@@ -24,7 +24,8 @@ vis.module = (function(vis) {
                 this.widget.update();
             }
             if (this.panel) {
-
+                this.panel.load(this.templateName);
+                this.panel.render();
             }
             if (this.ports) {
 
@@ -34,7 +35,7 @@ vis.module = (function(vis) {
 
         Module.prototype.select = function() {
             // vis.control.instance().setSelectedModule($this);
-            vis.control.instance().setPanel(this.templateName);
+            vis.control.instance().setPanel(this.panel);
         };
 
         Module.prototype.unselect = function() {
@@ -180,15 +181,24 @@ vis.module = (function(vis) {
 
             this.name = 'scatter-plot';
             this.displayName = 'Scatter Plot';
-            this.templateName = 'scatter';
 
             this.index = ScatterPlotModule.prototype.counter++;
             this.id = this.name + '-' + this.index;
             this.label = this.displayName + ' ' + this.index;
 
             this.widget = new vis.widget.SvgWidget(this);
+            this.panel = new vis.panel.Panel(this);
             // this.ports = new vis.port.PortManager(this);
-            // this.panel = new vis.panel.Panel(this);
+
+            this.panel.setContext({
+                id: 'vis-panel-' + this.id,
+                custom: false,
+                elements: [
+                    {name: 'x-axis', text: 'Axis X', attribs: [{name: 'data', text: 'Data'}]},
+                    {name: 'y-axis', text: 'Axis Y', attribs: [{name: 'data', text: 'Data'}]},
+                    {name: 'circle', text: 'Circle', attribs: [{name: 'color', text: 'Color'}, {name: 'size', text: 'Size'}]}
+                ]
+            });
         }
         ScatterPlotModule.prototype = Object.create(Module.prototype);
         ScatterPlotModule.prototype.counter = 1;
