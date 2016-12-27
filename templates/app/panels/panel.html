@@ -8,14 +8,14 @@
                 <h4>{{ text }}</h4>
             </div>
             <div class="side-panel-body">
-                {{ #attribs }}
+                {{ #attrs }}
                 <div class="side-panel-box" data-name="{{ name }}">
                     <span>{{ text }}</span>
                 </div>
-                {{ /attribs }}
-                {{ ^attribs }}
+                {{ /attrs }}
+                {{ ^attrs }}
                 There is no available ports for this element.
-                {{ /attribs }}
+                {{ /attrs }}
             </div>
         </div>
         {{ /elements }}

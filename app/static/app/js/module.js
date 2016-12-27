@@ -15,7 +15,9 @@ vis.module = (function(vis) {
 
             this.widget = null;
             this.panel = null;
-            this.ports = null;
+
+            this.elementManager = null;
+            this.portManager = null;
         }
 
         Module.prototype.init = function(canvasID, position) {
@@ -23,18 +25,21 @@ vis.module = (function(vis) {
                 this.widget.init(canvasID, position);
                 this.widget.update();
             }
-            if (this.panel) {
-                this.panel.load(this.templateName);
-                this.panel.render();
-            }
-            if (this.ports) {
+            if (this.elements) {
+                this.elementManager.init(this.elements);
+                if (this.panel) {
+                    this.panel.load(this.templateName);
+                    this.panel.setContext(this.getPanelContext(this.elementManager.elements));
+                    this.panel.render(); // Optional.
+                }
+                if (this.portManager) {
 
+                }
             }
             return this;
         };
 
         Module.prototype.select = function() {
-            // vis.control.instance().setSelectedModule($this);
             vis.control.instance().setPanel(this.panel);
         };
 
@@ -46,9 +51,35 @@ vis.module = (function(vis) {
             this._resizePorts();
         };
 
+        Module.prototype.getPanelContext = function(elements) {
+            var context = {id: 'vis-panel-' + this.id, custom: false, elements: []};
+            for (var id in elements) {
+                var e = elements[id];
+                var attrs = [];
+                for (var i in e.attrs) {
+                    var a = e.attrs[i];
+                    attrs.push({
+                        name: a.name,
+                        text: a.text
+                    });
+                }
+                context.elements.push({
+                    id: e.id,
+                    name: e.name,
+                    text: e.text,
+                    attrs: attrs
+                });
+            }
+            return context;
+        };
+
+        Module.prototype.getPorts = function(elements) {
+
+        };
+
         Module.prototype.addPort = function(name, type) {
             var p = new vis.port.Port(this, this.portContainer, name, type);
-            this.ports[type].push(p);
+            this.portManager[type].push(p);
         };
 
         Module.prototype._createPorts = function(widget) {
@@ -67,7 +98,7 @@ vis.module = (function(vis) {
 
         Module.prototype._resizePorts = function() {
             var s = 20, m = 5, l = this.h;
-            var ip = this.ports.input, op = this.ports.output;
+            var ip = this.portManager.input, op = this.portManager.output;
 
             var num1 = ip.length;
             var t1 = num1 * s + (num1 - 1) * m;
@@ -111,9 +142,9 @@ vis.module = (function(vis) {
         DataSourceModule.prototype.counter = 1;
 
         DataSourceModule.prototype.setDataPort = function(items) {
-            if (this.ports.data) {
-                this.ports.data.setDataItems(items);
-                this.ports.data.dataset = this.dataset;
+            if (this.portManager.data) {
+                this.portManager.data.setDataItems(items);
+                this.portManager.data.dataset = this.dataset;
             }
         };
 
@@ -153,7 +184,7 @@ vis.module = (function(vis) {
 
         DataSourceModule.prototype._resizePorts = function() {
             // The port needs to calculate width by itself, and needs parent width as reference.
-            this.ports.data.resize({
+            this.portManager.data.resize({
                 x: this.w,
                 y: this.h
             });
@@ -188,17 +219,15 @@ vis.module = (function(vis) {
 
             this.widget = new vis.widget.SvgWidget(this);
             this.panel = new vis.panel.Panel(this);
-            // this.ports = new vis.port.PortManager(this);
 
-            this.panel.setContext({
-                id: 'vis-panel-' + this.id,
-                custom: false,
-                elements: [
-                    {name: 'x-axis', text: 'Axis X', attribs: [{name: 'data', text: 'Data'}]},
-                    {name: 'y-axis', text: 'Axis Y', attribs: [{name: 'data', text: 'Data'}]},
-                    {name: 'circle', text: 'Circle', attribs: [{name: 'color', text: 'Color'}, {name: 'size', text: 'Size'}]}
-                ]
-            });
+            this.elementManager = new vis.element.ElementManager(this);
+            this.portManager = new vis.port.PortManager(this);
+
+            this.elements = [
+                {element: 'axis', name: 'x-axis', text: 'Axis X'},
+                {element: 'axis', name: 'y-axis', text: 'Axis Y'},
+                {element: 'circle'}
+            ];
         }
         ScatterPlotModule.prototype = Object.create(Module.prototype);
         ScatterPlotModule.prototype.counter = 1;
