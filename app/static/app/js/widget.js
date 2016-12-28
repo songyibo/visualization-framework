@@ -21,8 +21,8 @@ vis.widget = (function(vis) {
             this.canvas = null;
         }
 
-        Widget.prototype.init = function(canvasID, position) {
-            this.canvas = $('#' + canvasID).get(0);
+        Widget.prototype.init = function(canvasId, position) {
+            this.canvas = $('#' + canvasId).get(0);
             this.setPosition(position);
             this.element = this._createElement(this.canvas);
 
@@ -94,6 +94,7 @@ vis.widget = (function(vis) {
                 resize: function(x, y, w, h) {
                     $this.setPosition({x: x, y: y, w: w, h: h});
                     $this.updateComponents();
+                    $this.module.resize();
                 }
             });
         };

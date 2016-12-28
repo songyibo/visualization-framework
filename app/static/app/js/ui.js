@@ -18,23 +18,25 @@ vis.ui = (function(vis) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                selected = true;
-                $(widget).addClass('vis-ui-selected');
-                if (options.select) options.select.call(widget);
+                $.when(
+                    // Unselect other selectable objects.
+                    $(document).triggerHandler('mousedown')
+                ).done(function() {
+                    selected = true;
+                    $(widget).addClass('vis-ui-selected');
+                    if (options.select) options.select.call(widget);
 
-                $(document).on('mousedown.vis-ui-select' + index, function(e, i) {
-                    if (e.which == 1 || i != index) {
-                        // Unbind its own handler.
-                        $(document).off('mousedown.vis-ui-select' + index);
+                    $(document).on('mousedown.vis-ui-select' + index, function(e, i) {
+                        if (e.which == 1 || i != index) {
+                            // Unbind its own handler.
+                            $(document).off('mousedown.vis-ui-select' + index);
 
-                        selected = false;
-                        $(widget).removeClass('vis-ui-selected');
-                        if (options.cancel) options.cancel.call(widget);
-                    }
+                            selected = false;
+                            $(widget).removeClass('vis-ui-selected');
+                            if (options.cancel) options.cancel.call(widget);
+                        }
+                    });
                 });
-
-                // Unselect other selectable objects.
-                $(document).triggerHandler('mousedown', index);
             }
         });
     }

@@ -125,6 +125,8 @@ vis.control = (function(vis) {
                 }
             });
 
+            $('.side-panel').on('mousedown', function(e) { e.stopPropagation(); });
+
             control.setPanel();
         });
     })();

@@ -54,6 +54,10 @@
     border: 1px solid red;
 }
 
+.side-panel-body .checked {
+    border: 1px solid blue;
+}
+
 .side-panel-body span {
     position: absolute;
     width: 60px;

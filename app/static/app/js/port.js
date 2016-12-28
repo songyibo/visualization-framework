@@ -3,17 +3,13 @@ var vis = vis || {};
 vis.port = (function(vis) {
 
     var Port = (function() {
-        function Port(module, parent, name, type, position) {
+        function Port(parent, position) {
             if (!position) position = {};
             this.x = position.x || 0;
             this.y = position.y || 0;
             this.w = position.w || 20;
             this.h = position.h || 20;
 
-            this.name = name || '';
-            this.type = type || '';
-
-            this.module = module;
             this.parent = parent;
             this._createElement(parent);
             this._setConnectAction(this.element);
@@ -78,9 +74,50 @@ vis.port = (function(vis) {
     })();
 
     var PortManager = (function() {
-        function PortManager() {
+        function PortManager(module) {
+            this.module = module || null;
 
+            this.size = 20;
+            this.margin = 5;
+
+            this.input = new vis.util.OrderedDict();
+            this.output = new vis.util.OrderedDict();
         }
+
+        PortManager.prototype.init = function(widget) {
+            var container = $('<div>').addClass('vis-port-container').appendTo(widget);
+            this.container = container.get(0);
+        };
+
+        PortManager.prototype.addPort = function(c) {
+            var p = new Port(this.container);
+            var dict = (c.type == 'input') ? this.input : this.output;
+            dict.add({
+                id: c.element + '-' + c.attr,
+                context: c,
+                port: p
+            });
+        };
+
+        PortManager.prototype.resize = function() {
+            var s = this.size, m = this.margin;
+            var w = this.module.widget.w, h = this.module.widget.h;
+            this._resize(this.input, 0 - m - s, h, s, m);
+            this._resize(this.output, w + m, h, s, m);
+        };
+
+        PortManager.prototype._resize = function(dict, start, total, size, margin) {
+            var num = dict.length;
+            var t = num * size + (num - 1) * margin;
+            var x = start, y = (total - t) / 2;
+            var index = 0;
+            dict.reset();
+            while (!dict.end()) {
+                var p = dict.next();
+                p.port.resize({x: x, y: y + index * (margin + size), w: size, h: size});
+                index++;
+            }
+        };
 
         return PortManager;
     })();

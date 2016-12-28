@@ -16,8 +16,10 @@ vis.module = (function(vis) {
             this.widget = null;
             this.panel = null;
 
-            this.elementManager = null;
-            this.portManager = null;
+            this.elements = null;
+            this.ports = null;
+
+            this.conf = {input: [], output: []};
         }
 
         Module.prototype.init = function(canvasID, position) {
@@ -26,14 +28,23 @@ vis.module = (function(vis) {
                 this.widget.update();
             }
             if (this.elements) {
-                this.elementManager.init(this.elements);
+                this.elements.init(this.conf);
                 if (this.panel) {
                     this.panel.load(this.templateName);
-                    this.panel.setContext(this.getPanelContext(this.elementManager.elements));
-                    this.panel.render(); // Optional.
+                    var context = {
+                        id: 'vis-panel-' + this.id,
+                        custom: false,
+                        elements: this.elements.format()
+                    };
+                    this.panel.render(context);
                 }
-                if (this.portManager) {
-
+                if (this.ports) {
+                    this.ports.init(this.widget.element);
+                    var array = this.elements.enables();
+                    for (var i in array) {
+                        this.ports.addPort(array[i]);
+                    }
+                    this.ports.resize();
                 }
             }
             return this;
@@ -47,73 +58,8 @@ vis.module = (function(vis) {
             vis.control.instance().setPanel();
         };
 
-        Module.prototype.updateComponents = function() {
-            this._resizePorts();
-        };
-
-        Module.prototype.getPanelContext = function(elements) {
-            var context = {id: 'vis-panel-' + this.id, custom: false, elements: []};
-            for (var id in elements) {
-                var e = elements[id];
-                var attrs = [];
-                for (var i in e.attrs) {
-                    var a = e.attrs[i];
-                    attrs.push({
-                        name: a.name,
-                        text: a.text
-                    });
-                }
-                context.elements.push({
-                    id: e.id,
-                    name: e.name,
-                    text: e.text,
-                    attrs: attrs
-                });
-            }
-            return context;
-        };
-
-        Module.prototype.getPorts = function(elements) {
-
-        };
-
-        Module.prototype.addPort = function(name, type) {
-            var p = new vis.port.Port(this, this.portContainer, name, type);
-            this.portManager[type].push(p);
-        };
-
-        Module.prototype._createPorts = function(widget) {
-            var container = $('<div>').addClass('vis-port-container').appendTo(widget);
-            this.portContainer = container[0];
-            return {
-                input: [],
-                output: []
-            };
-        };
-
-        Module.prototype._registerPorts = function() {
-            this.addPort('xAxis', 'input');
-            this.addPort('yAxis', 'input');
-        };
-
-        Module.prototype._resizePorts = function() {
-            var s = 20, m = 5, l = this.h;
-            var ip = this.portManager.input, op = this.portManager.output;
-
-            var num1 = ip.length;
-            var t1 = num1 * s + (num1 - 1) * m;
-            var x1 = -(m + s), y1 = (l - t1) / 2;
-            for (var i in ip) {
-                var p = ip[i];
-                p.resize({x: x1, y: i * (m + s) + y1, w: s, h: s});
-            }
-
-            var num2 = op.length;
-            var t2 = num2 * s + (num2 - 1) * m;
-            var x2 = 0, y2 = (l - t2) / 2;
-            for (var o in op) {
-                op[o].resize({x: x2, y: o * (m + s) + y2, w: s, h: s});
-            }
+        Module.prototype.resize = function() {
+            this.ports.resize();
         };
 
         return Module;
@@ -220,44 +166,20 @@ vis.module = (function(vis) {
             this.widget = new vis.widget.SvgWidget(this);
             this.panel = new vis.panel.Panel(this);
 
-            this.elementManager = new vis.element.ElementManager(this);
-            this.portManager = new vis.port.PortManager(this);
+            this.elements = new vis.element.ElementManager(this);
+            this.ports = new vis.port.PortManager(this);
 
-            this.elements = [
-                {element: 'axis', name: 'x-axis', text: 'Axis X'},
-                {element: 'axis', name: 'y-axis', text: 'Axis Y'},
-                {element: 'circle'}
-            ];
+            this.conf = {
+                input: [
+                    {element: 'axis', name: 'axis-x', text: 'Axis X', attrs: ['extent']},
+                    {element: 'axis', name: 'axis-y', text: 'Axis Y', attrs: ['extent']},
+                    {element: 'circle', attrs: ['color', 'size']}
+                ],
+                output: []
+            };
         }
         ScatterPlotModule.prototype = Object.create(Module.prototype);
         ScatterPlotModule.prototype.counter = 1;
-
-        ScatterPlotModule.prototype.setAxisInput = function(data, dataset, key) {
-            if (this.dataset != dataset) {
-                this.dataset = dataset;
-                this.xAxis = '';
-            }
-
-            this.data = data;
-            if (this.yAxis) {
-                this.xAxis = this.yAxis;
-                this.yAxis = key;
-            } else if (this.xAxis) {
-                this.yAxis = key;
-            } else {
-                this.xAxis = key;
-                this.yAxis = '';
-            }
-
-            if (this.xAxis && this.yAxis) {
-                this.svg.render(data, {
-                    x: this.xAxis,
-                    y: this.yAxis,
-                    color: null
-                });
-            }
-        };
-
         return ScatterPlotModule;
     })();
 

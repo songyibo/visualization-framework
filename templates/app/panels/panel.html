@@ -5,11 +5,11 @@
         {{ #elements }}
         <div class="side-panel-category">
             <div class="side-panel-heading">
-                <h4>{{ text }}</h4>
+                <h4>{{ text }} : {{ type }}</h4>
             </div>
             <div class="side-panel-body">
                 {{ #attrs }}
-                <div class="side-panel-box" data-name="{{ name }}">
+                <div class="side-panel-box {{ #checked }}checked{{ /checked }}" data-name="{{ name }}">
                     <span>{{ text }}</span>
                 </div>
                 {{ /attrs }}
