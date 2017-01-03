@@ -8,8 +8,8 @@ vis.control = (function(vis) {
 
         this.panel = $('.side-panel').get(0);
 
-        this.datasets = {};
-        this.modules = {};
+        this.datasets = new vis.util.OrderedDict();
+        this.modules = new vis.util.OrderedDict();
 
         this.canvasManager = new vis.svg.CanvasManager(this.svgCanvas);
     }
@@ -94,7 +94,7 @@ vis.control = (function(vis) {
         var module = make();
         if (module) {
             module.init(this.widgetCanvas, {x: x, y: y});
-            this.modules[module.id] = module;
+            this.modules.add(module);
         }
     };
 
@@ -117,11 +117,22 @@ vis.control = (function(vis) {
 
             $('.side-panel').on('click', '.side-panel-box', function(e) {
                 e.stopPropagation();
-                var m = $(this).attr('data-module');
-                if (m) {
+                var moduleName = $(this).attr('data-module');
+                if (moduleName) {
                     var $c = $('#' + control.svgCanvas);
                     var w = $c.width(), h = $c.height();
-                    control.createModule(m, w / 3, h / 3);
+                    control.createModule(moduleName, w / 3, h / 3);
+                }
+                var attrName = $(this).attr('data-attr');
+                if (attrName) {
+                    $(this).toggleClass('checked');
+                    var elementID = $(this).closest('.side-panel-category').attr('data-element');
+                    var ioType = $(this).closest('.side-panel-category').attr('data-type');
+                    var moduleID = $(this).closest('.side-panel-container').attr('data-module');
+                    if (elementID && moduleID) {
+                        var module = control.modules.get(moduleID);
+                        module.toggleAttr(elementID, attrName, ioType);
+                    }
                 }
             });
 

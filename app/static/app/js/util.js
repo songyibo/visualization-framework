@@ -14,9 +14,28 @@ vis.util = (function(vis) {
     OrderedDict.prototype.add = function(e) {
         var id = e[this.idName];
         if (id) {
-            this.array.push(id);
-            this.dict[id] = e;
-            this.length++;
+            if (!this.dict[id]) {
+                this.array.push(id);
+                this.dict[id] = e;
+                this.length++;
+            } else {
+                console.warn('Element already exists in the dict.');
+            }
+        }
+    };
+
+    OrderedDict.prototype.get = function(id) {
+        return this.dict[id];
+    };
+
+    OrderedDict.prototype.remove = function(id) {
+        delete this.dict[id];
+        for (var i in this.array) {
+            if (this.array[i] == id) {
+                this.array.splice(i, 1);
+                this.length--;
+                break;
+            }
         }
     };
 
@@ -28,7 +47,7 @@ vis.util = (function(vis) {
         }
     };
 
-    OrderedDict.prototype.reset = function() {
+    OrderedDict.prototype.begin = function() {
         this.index = 0;
     };
 

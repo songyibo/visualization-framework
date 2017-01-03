@@ -18,6 +18,10 @@ vis.port = (function(vis) {
             this.dest = [];
         }
 
+        Port.prototype.remove = function() {
+            $(this.element).remove();
+        };
+
         Port.prototype._createElement = function(parent) {
             var element = $('<div>').addClass('vis-port');
             $(parent).append(element);
@@ -99,6 +103,28 @@ vis.port = (function(vis) {
             });
         };
 
+        PortManager.prototype.togglePort = function(elementID, attrName, ioType) {
+            var dict = (ioType == 'input') ? this.input : this.output;
+            var id = elementID + '-' + attrName;
+            var p = dict.get(id);
+            if (p) {
+                // TODO: Remove connections.
+                p.port.remove();
+                dict.remove(id);
+            } else {
+                dict.add({
+                    id: id,
+                    context: {
+                        module: this.module.id,
+                        element: elementID,
+                        attr: attrName,
+                        type: ioType
+                    },
+                    port: new Port(this.container)
+                });
+            }
+        };
+
         PortManager.prototype.resize = function() {
             var s = this.size, m = this.margin;
             var w = this.module.widget.w, h = this.module.widget.h;
@@ -111,7 +137,7 @@ vis.port = (function(vis) {
             var t = num * size + (num - 1) * margin;
             var x = start, y = (total - t) / 2;
             var index = 0;
-            dict.reset();
+            dict.begin();
             while (!dict.end()) {
                 var p = dict.next();
                 p.port.resize({x: x, y: y + index * (margin + size), w: size, h: size});

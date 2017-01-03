@@ -7,8 +7,8 @@ vis.element = (function(vis) {
         para = para || {};
     }
 
-    Element.prototype._id = function(moduleId, name) {
-        return (moduleId || 'unknown') + '-' + name;
+    Element.prototype._id = function(moduleID, name) {
+        return (moduleID || 'unknown') + '-' + name;
     };
 
     function AxisElement(para) {
@@ -73,7 +73,7 @@ vis.element = (function(vis) {
 
     ElementManager.prototype.format = function() {
         var iterate = function(dict, result, type) {
-            dict.reset();
+            dict.begin();
             while (!dict.end()) {
                 var element = dict.next();
                 var attrs = [];
@@ -86,6 +86,8 @@ vis.element = (function(vis) {
                     });
                 }
                 result.push({
+                    id: element.id,
+                    name: element.name,
                     text: element.text,
                     type: type,
                     attrs: attrs
@@ -101,7 +103,7 @@ vis.element = (function(vis) {
     ElementManager.prototype.enables = function() {
         var $this = this;
         var iterate = function(dict, result, type) {
-            dict.reset();
+            dict.begin();
             while (!dict.end()) {
                 var element = dict.next();
                 for (var i in element.attrs) {
@@ -121,6 +123,15 @@ vis.element = (function(vis) {
         iterate(this.input, result, 'input');
         iterate(this.output, result, 'output');
         return result;
+    };
+
+    ElementManager.prototype.toggleAttr = function(elementID, attrName, ioType) {
+        var dict = (ioType == 'input') ? this.input : this.output;
+        var element = dict.get(elementID);
+        if (element) {
+            var attr = element.attrs[attrName];
+            attr.enabled = !attr.enabled;
+        }
     };
 
     var construct = {

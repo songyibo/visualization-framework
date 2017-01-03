@@ -33,6 +33,7 @@ vis.module = (function(vis) {
                     this.panel.load(this.templateName);
                     var context = {
                         id: 'vis-panel-' + this.id,
+                        module: this.id,
                         custom: false,
                         elements: this.elements.format()
                     };
@@ -59,6 +60,12 @@ vis.module = (function(vis) {
         };
 
         Module.prototype.resize = function() {
+            this.ports.resize();
+        };
+
+        Module.prototype.toggleAttr = function(elementID, attrName, ioType) {
+            this.elements.toggleAttr(elementID, attrName, ioType);
+            this.ports.togglePort(elementID, attrName, ioType);
             this.ports.resize();
         };
 
