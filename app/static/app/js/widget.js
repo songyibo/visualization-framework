@@ -50,6 +50,7 @@ vis.widget = (function(vis) {
         };
 
         Widget.prototype.updateComponents = function() {
+            // To override here.
         };
 
         Widget.prototype.update = function() {

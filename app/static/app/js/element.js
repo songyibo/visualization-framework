@@ -7,8 +7,8 @@ vis.element = (function(vis) {
         para = para || {};
     }
 
-    Element.prototype._id = function(moduleID, name) {
-        return (moduleID || 'unknown') + '-' + name;
+    Element.prototype._id = function(moduleID) {
+        return (moduleID || 'unknown') + '-' + this.type + '-' + this.name;
     };
 
     function AxisElement(para) {
@@ -16,7 +16,8 @@ vis.element = (function(vis) {
         para = para || {};
         this.name = para.name || 'axis';
         this.text = para.text || 'Axis';
-        this.id = this._id(para.id, this.name);
+        this.type = 'input';
+        this.id = this._id(para.module);
 
         this.attrs = {
             extent: new vis.attr.Extent()
@@ -29,7 +30,8 @@ vis.element = (function(vis) {
         para = para || {};
         this.name = para.name || 'circle';
         this.text = para.text || 'Circle';
-        this.id = this._id(para.id, this.name);
+        this.type = 'input';
+        this.id = this._id(para.module);
 
         this.attrs = {
             color: new vis.attr.Color(),
@@ -39,21 +41,21 @@ vis.element = (function(vis) {
     }
     CircleElement.prototype = Object.create(Element.prototype);
 
-    function ElementManager(module) {
-        this.module = module || null;
+    var ElementManager = (function() {
+        function ElementManager(module) {
+            this.module = module || null;
 
-        this.input = new vis.util.OrderedDict();
-        this.output = new vis.util.OrderedDict();
-    }
+            this.all = new vis.util.OrderedDict();
+            this.input = new vis.util.OrderedDict();
+            this.output = new vis.util.OrderedDict();
+        }
 
-    ElementManager.prototype.init = function(elements) {
-        var $this = this;
-        var iterate = function(elements, array) {
+        ElementManager.prototype.init = function(elements) {
             for (var i in elements) {
                 var e = elements[i];
                 var make = vis.element.construct[e.element];
                 if (make) {
-                    var element = make({id: $this.module.id, name: e.name, text: e.text});
+                    var element = make({module: this.module.id, name: e.name, text: e.text});
                 } else {
                     console.warn('Element creation failed: ' + e.element);
                     continue;
@@ -63,22 +65,26 @@ vis.element = (function(vis) {
                     var attr = element.attrs[a];
                     if (attr) attr.enabled = true;
                 }
-                array.add(element);
+                this._addElement(element);
             }
         };
 
-        iterate(elements.input, this.input);
-        iterate(elements.output, this.output);
-    };
+        ElementManager.prototype._addElement = function(element) {
+            if (element.type == 'input' || element.type == 'output') {
+                this.all.push(element.id, element);
+                this[element.type].push(element.id);
+            } else {
+                console.warn('Unknown element type.');
+            }
+        };
 
-    ElementManager.prototype.format = function() {
-        var iterate = function(dict, result, type) {
-            dict.begin();
-            while (!dict.end()) {
-                var element = dict.next();
+        ElementManager.prototype.panelConfig = function() {
+            var result = [];
+            for (var i = 0; i < this.all.length; i++) {
+                var element = this.all.at(i);
                 var attrs = [];
-                for (var i in element.attrs) {
-                    var attr = element.attrs[i];
+                for (var k in element.attrs) {
+                    var attr = element.attrs[k];
                     attrs.push({
                         name: attr.name,
                         text: attr.text,
@@ -89,50 +95,42 @@ vis.element = (function(vis) {
                     id: element.id,
                     name: element.name,
                     text: element.text,
-                    type: type,
+                    type: element.type,
                     attrs: attrs
                 });
             }
+            return result;
         };
-        var result = [];
-        iterate(this.input, result, 'input');
-        iterate(this.output, result, 'output');
-        return result;
-    };
 
-    ElementManager.prototype.enables = function() {
-        var $this = this;
-        var iterate = function(dict, result, type) {
-            dict.begin();
-            while (!dict.end()) {
-                var element = dict.next();
-                for (var i in element.attrs) {
-                    var attr = element.attrs[i];
+        ElementManager.prototype.portConfig = function() {
+            var result = [];
+            for (var i = 0; i < this.all.length; i++) {
+                var element = this.all.at(i);
+                for (var k in element.attrs) {
+                    var attr = element.attrs[k];
                     if (attr.enabled) {
                         result.push({
-                            module: $this.module.id,
+                            module: this.module.id,
                             element: element.id,
-                            attr: attr.name,
-                            type: type
+                            type: element.type,
+                            attr: attr.name
                         });
                     }
                 }
             }
+            return result;
         };
-        var result = [];
-        iterate(this.input, result, 'input');
-        iterate(this.output, result, 'output');
-        return result;
-    };
 
-    ElementManager.prototype.toggleAttr = function(elementID, attrName, ioType) {
-        var dict = (ioType == 'input') ? this.input : this.output;
-        var element = dict.get(elementID);
-        if (element) {
-            var attr = element.attrs[attrName];
-            attr.enabled = !attr.enabled;
-        }
-    };
+        ElementManager.prototype.toggleAttr = function(elementID, attrName) {
+            var element = this.all.get(elementID);
+            if (element) {
+                var attr = element.attrs[attrName];
+                attr.enabled = !attr.enabled;
+            }
+        };
+
+        return ElementManager;
+    })();
 
     var construct = {
         axis: function(para) { return new AxisElement(para); },

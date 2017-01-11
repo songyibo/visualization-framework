@@ -94,7 +94,7 @@ vis.control = (function(vis) {
         var module = make();
         if (module) {
             module.init(this.widgetCanvas, {x: x, y: y});
-            this.modules.add(module);
+            this.modules.push(module.id, module);
         }
     };
 
@@ -126,12 +126,12 @@ vis.control = (function(vis) {
                 var attrName = $(this).attr('data-attr');
                 if (attrName) {
                     $(this).toggleClass('checked');
-                    var elementID = $(this).closest('.side-panel-category').attr('data-element');
-                    var ioType = $(this).closest('.side-panel-category').attr('data-type');
                     var moduleID = $(this).closest('.side-panel-container').attr('data-module');
-                    if (elementID && moduleID) {
+                    if (moduleID) {
                         var module = control.modules.get(moduleID);
-                        module.toggleAttr(elementID, attrName, ioType);
+                        var elementID = $(this).closest('.side-panel-category').attr('data-element');
+                        var type = $(this).closest('.side-panel-category').attr('data-type');
+                        module.toggleAttr(elementID, attrName, type);
                     }
                 }
             });

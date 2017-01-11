@@ -28,22 +28,22 @@ vis.module = (function(vis) {
                 this.widget.update();
             }
             if (this.elements) {
-                this.elements.init(this.conf);
+                this.elements.init(this.conf.elements);
                 if (this.panel) {
                     this.panel.load(this.templateName);
                     var context = {
                         id: 'vis-panel-' + this.id,
                         module: this.id,
                         custom: false,
-                        elements: this.elements.format()
+                        elements: this.elements.panelConfig()
                     };
                     this.panel.render(context);
                 }
                 if (this.ports) {
                     this.ports.init(this.widget.element);
-                    var array = this.elements.enables();
-                    for (var i in array) {
-                        this.ports.addPort(array[i]);
+                    var ports = this.elements.portConfig();
+                    for (var i in ports) {
+                        this.ports.add(ports[i]);
                     }
                     this.ports.resize();
                 }
@@ -63,10 +63,16 @@ vis.module = (function(vis) {
             this.ports.resize();
         };
 
-        Module.prototype.toggleAttr = function(elementID, attrName, ioType) {
-            this.elements.toggleAttr(elementID, attrName, ioType);
-            this.ports.togglePort(elementID, attrName, ioType);
+        Module.prototype.toggleAttr = function(elementID, attrName, type) {
+            this.elements.toggleAttr(elementID, attrName);
+            this.ports.togglePort(elementID, attrName, type);
             this.ports.resize();
+            this.panel.render({
+                id: 'vis-panel-' + this.id,
+                module: this.id,
+                custom: false,
+                elements: this.elements.panelConfig()
+            });
         };
 
         return Module;
@@ -177,12 +183,11 @@ vis.module = (function(vis) {
             this.ports = new vis.port.PortManager(this);
 
             this.conf = {
-                input: [
-                    {element: 'axis', name: 'axis-x', text: 'Axis X', attrs: ['extent']},
-                    {element: 'axis', name: 'axis-y', text: 'Axis Y', attrs: ['extent']},
-                    {element: 'circle', attrs: ['color', 'size']}
-                ],
-                output: []
+                elements: [
+                    {element: 'axis', type: 'input', name: 'axis-x', text: 'Axis X', attrs: ['extent']},
+                    {element: 'axis', type: 'input', name: 'axis-y', text: 'Axis Y', attrs: ['extent']},
+                    {element: 'circle', type: 'input', attrs: ['color', 'size']}
+                ]
             };
         }
         ScatterPlotModule.prototype = Object.create(Module.prototype);

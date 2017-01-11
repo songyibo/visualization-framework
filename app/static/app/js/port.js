@@ -84,6 +84,7 @@ vis.port = (function(vis) {
             this.size = 20;
             this.margin = 5;
 
+            this.all = new vis.util.OrderedDict();
             this.input = new vis.util.OrderedDict();
             this.output = new vis.util.OrderedDict();
         }
@@ -93,34 +94,54 @@ vis.port = (function(vis) {
             this.container = container.get(0);
         };
 
-        PortManager.prototype.addPort = function(c) {
+        PortManager.prototype.add = function(c) {
             var p = new Port(this.container);
-            var dict = (c.type == 'input') ? this.input : this.output;
-            dict.add({
+            var port = {
                 id: c.element + '-' + c.attr,
-                context: c,
+                type: c.type,
                 port: p
-            });
+            };
+
+            this.all.push(port.id, port);
+            if (c.type == 'input') {
+                this.input.push(port.id);
+            } else if (c.type == 'output') {
+                this.output.push(port.id);
+            } else {
+                console.warn('Unknown port type.');
+            }
         };
 
-        PortManager.prototype.togglePort = function(elementID, attrName, ioType) {
-            var dict = (ioType == 'input') ? this.input : this.output;
+        PortManager.prototype.remove = function(c) {
+            var id = c.element + '-' + c.attr;
+            var p = this.all.get(id);
+            if (p) {
+                p.port.remove();
+                this.all.remove(id);
+                if (p.type == 'input') {
+                    this.input.remove(p.id);
+                } else if (p.type == 'output') {
+                    this.output.remove(p.id);
+                } else {
+                    console.warn('Unknown port type.');
+                }
+            }
+        };
+
+        PortManager.prototype.togglePort = function(elementID, attrName, type) {
             var id = elementID + '-' + attrName;
-            var p = dict.get(id);
+            var p = this.all.get(id);
             if (p) {
                 // TODO: Remove connections.
-                p.port.remove();
-                dict.remove(id);
+                this.remove({
+                    element: elementID,
+                    attr: attrName
+                });
             } else {
-                dict.add({
-                    id: id,
-                    context: {
-                        module: this.module.id,
-                        element: elementID,
-                        attr: attrName,
-                        type: ioType
-                    },
-                    port: new Port(this.container)
+                this.add({
+                    element: elementID,
+                    type: type,
+                    attr: attrName
                 });
             }
         };
@@ -137,9 +158,9 @@ vis.port = (function(vis) {
             var t = num * size + (num - 1) * margin;
             var x = start, y = (total - t) / 2;
             var index = 0;
-            dict.begin();
-            while (!dict.end()) {
-                var p = dict.next();
+            for (var i = 0; i < dict.length; i++) {
+                var k = dict.key(i);
+                var p = this.all.get(k);
                 p.port.resize({x: x, y: y + index * (margin + size), w: size, h: size});
                 index++;
             }
