@@ -40,6 +40,14 @@ vis.attr = (function(vis) {
     }
     Opacity.prototype = Object.create(Attribute.prototype);
 
+    function DataColumn() {
+        Attribute.call(this);
+        this.name = 'column';
+        this.text = 'Column';
+        this.color = '#2d6dee';
+    }
+    DataColumn.prototype = Object.create(Attribute.prototype);
+
     return {
         Extent: Extent,
         Color: Color,

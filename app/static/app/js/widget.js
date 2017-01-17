@@ -140,7 +140,49 @@ vis.widget = (function(vis) {
         return SvgWidget;
     })();
 
+    var DataSourceWidget = (function() {
+        function DataSourceWidget(module, options) {
+            Widget.apply(this, arguments);
+            options = options || {};
+
+            this.w = options.w || 200;
+            this.h = options.h || 300;
+            this.wMin = options.minWidth || 150;
+            this.hMin = options.minHeight || 200;
+        }
+        DataSourceWidget.prototype = Object.create(Widget.prototype);
+
+        DataSourceWidget.prototype._createElement = function(container) {
+            var element = Widget.prototype._createElement.call(this, container);
+
+            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(element);
+            var label = $('<div>').addClass('vis-widget-label').text(this.module.label).appendTo(labelWrapper);
+            var inputContainer = $('<div>').addClass('vis-widget-select-wrapper').appendTo(element);
+            var input = $('<div>', {id: 'vis-widget-select-' + this.module.id, class: 'vis-widget-select'}).appendTo(inputContainer);
+
+            var module = this.module;
+            // Set callback when user selects a new dataset.
+            // When new dataset selected, try to add the dataset to global controller.
+            var select = new vis.html.Dropdown(input.attr('id'), function(dataset) {
+                module.setDataset(dataset);
+            });
+
+            // Get available datasets from server.
+            // Add names to select widget when datasets return.
+            vis.network.getDatasets(function(datasets) {
+                for (var i in datasets) {
+                    select.addMenuItem(datasets[i]);
+                }
+            });
+
+            return element;
+        };
+
+        return DataSourceWidget;
+    })();
+
     return {
-        SvgWidget: SvgWidget
+        SvgWidget: SvgWidget,
+        DataSourceWidget: DataSourceWidget
     };
 })(vis);

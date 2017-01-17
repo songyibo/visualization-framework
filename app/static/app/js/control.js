@@ -19,21 +19,17 @@ vis.control = (function(vis) {
     };
 
     Controller.prototype.getDataset = function(dataset) {
-        return this.datasets[dataset] || null;
+        return this.datasets.get(dataset) || null;
     };
 
     Controller.prototype.addDataset = function(dataset) {
         var $this = this;
-
         if (!this.datasets[dataset]) {
-            vis.network.getDataset(dataset, function(response) {
-                $this.datasets[dataset] = response;
+            return vis.network.getDataset(dataset, function(response) {
+                $this.datasets.push(dataset, response);
                 // Temporarily for tabular data: passing column parameter in.
-                $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
+                // $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
             });
-        } else {
-            var ds = this.datasets[dataset];
-            $this._updateDataSources(ds.name, ds.columns.map(function(c) { return c.name; }));
         }
     };
 

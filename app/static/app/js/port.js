@@ -94,6 +94,16 @@ vis.port = (function(vis) {
             this.container = container.get(0);
         };
 
+        PortManager.prototype.clear = function() {
+            for (var i = 0; i < this.all.length; i++) {
+                var p = this.all.at(i);
+                p.remove();
+            }
+            this.all.clear();
+            this.input.clear();
+            this.output.clear();
+        };
+
         PortManager.prototype.add = function(c) {
             var p = new Port(this.container);
             var port = {

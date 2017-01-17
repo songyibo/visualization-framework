@@ -19,7 +19,7 @@ vis.module = (function(vis) {
             this.elements = null;
             this.ports = null;
 
-            this.conf = {input: [], output: []};
+            this.conf = {};
         }
 
         Module.prototype.init = function(canvasID, position) {
@@ -85,78 +85,47 @@ vis.module = (function(vis) {
         function DataSourceModule(dataset) {
             Module.call(this);
 
-            this.w = 180; this.h = 100;
-            this.wMin = 150; this.hMin = 80;
-            this.hMax = 120;
+            this.name = 'data-source';
+            this.displayName = 'Data Source';
 
-            this.name = 'Data Source';
             this.index = DataSourceModule.prototype.counter++;
-            this.label = this.name + '_' + this.index;
+            this.id = this.name + '-' + this.index;
+            this.label = this.displayName + ' ' + this.index;
 
-            this.type = 'data';
-            this.dataset = dataset || '';
+            this.widget = new vis.widget.DataSourceWidget(this);
+            this.panel = new vis.panel.Panel(this);
+
+            this.elements = new vis.element.ElementManager(this);
+            this.ports = new vis.port.PortManager(this);
+
+            this.conf = {
+                elements: []
+            };
         }
         DataSourceModule.prototype = Object.create(Module.prototype);
-
         DataSourceModule.prototype.counter = 1;
 
-        DataSourceModule.prototype.setDataPort = function(items) {
-            if (this.portManager.data) {
-                this.portManager.data.setDataItems(items);
-                this.portManager.data.dataset = this.dataset;
+        DataSourceModule.prototype.setDataset = function(dataset) {
+            if (this.dataset != dataset) {
+                this.dataset = dataset;
+                var $this = this;
+                $.when(
+                    vis.control.instance().addDataset(dataset)
+                ).done(function() {
+                    var data = vis.control.instance().getDataset(dataset);
+                    $this.elements.clear();
+                    $this.ports.clear();
+                    var attrs = [];
+                    for (var i in data.columns) {
+                        attrs.push({
+                            name: 'data', type: 'input', text: data.columns[i].name
+                        });
+                    }
+                    $this.elements.init([
+                        {element: 'table', type: 'input', name: 'table', text: 'Table Data', attrs: attrs}
+                    ]);
+                });
             }
-        };
-
-        DataSourceModule.prototype._createWidget = function(parent) {
-            var widget = Module.prototype._createWidget.apply(this, arguments);
-
-            var labelWrapper = $('<div>').addClass('vis-widget-label-wrapper').appendTo(widget);
-            var label = $('<div>').addClass('vis-widget-label').text(this.label).appendTo(labelWrapper);
-
-            var selectWrapper = $('<div>').addClass('vis-widget-select-wrapper').appendTo(widget);
-            var select = $('<div>', {id: 'vis-widget-datasource-' + this.index, class: 'vis-widget-select'}).appendTo(selectWrapper);
-
-            var $this = this;
-            // Set callback when user selects a new dataset.
-            // When new dataset selected, try to add the dataset to global controller.
-            var element = new vis.html.Dropdown(select.attr('id'), function(dataset) {
-                $this.dataset = dataset;
-                vis.control.instance().addDataset(dataset);
-            });
-
-            // Get available datasets from server.
-            // Add names to select widget when datasets return.
-            vis.network.getDatasets(function(datasets) {
-                for (var i in datasets) {
-                    element.addMenuItem(datasets[i]);
-                }
-            });
-
-            this.select = element;
-            return widget;
-        };
-
-        DataSourceModule.prototype._createPorts = function(widget) {
-            var p = new vis.port.DataPort(widget);
-            return { data: p };
-        };
-
-        DataSourceModule.prototype._resizePorts = function() {
-            // The port needs to calculate width by itself, and needs parent width as reference.
-            this.portManager.data.resize({
-                x: this.w,
-                y: this.h
-            });
-        };
-
-        DataSourceModule.prototype._setConnectAction = function(widget) {
-            var $this = this;
-            vis.ui.connectable(widget, {
-                start: function() {
-                    // Record this source data widget.
-                    vis.control.instance().setConnectSource($this);
-                }
-            });
         };
 
         return DataSourceModule;
@@ -289,9 +258,9 @@ vis.module = (function(vis) {
 
     var construct = {
         'data-source': function() { return new DataSourceModule(); },
-        
-        'custom-view': function() { return new CustomViewModule(); },
-        'scatter-plot': function() { return new ScatterPlotModule(); }
+        'scatter-plot': function() { return new ScatterPlotModule(); },
+
+        'custom-view': function() { return new CustomViewModule(); }
     };
  
     return {

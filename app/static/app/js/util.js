@@ -44,6 +44,12 @@ vis.util = (function(vis) {
         }
     };
 
+    OrderedDict.prototype.clear = function() {
+        this.length = 0;
+        this.array = [];
+        this.dict = {};
+    };
+
     return {
         OrderedDict: OrderedDict
     };

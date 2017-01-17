@@ -41,6 +41,18 @@ vis.element = (function(vis) {
     }
     CircleElement.prototype = Object.create(Element.prototype);
 
+    function DataColumnElement(para) {
+        Element.apply(this, arguments);
+        para = para || {};
+        this.name = para.name || 'data';
+        this.text = para.text || 'Data';
+        this.type = 'input';
+        this.id = this._id(para.module);
+
+        this.attrs = {};
+    }
+    DataColumnElement.prototype = Object.create(Element.prototype);
+
     var ElementManager = (function() {
         function ElementManager(module) {
             this.module = module || null;
@@ -67,6 +79,12 @@ vis.element = (function(vis) {
                 }
                 this._addElement(element);
             }
+        };
+
+        ElementManager.prototype.clear = function() {
+            this.all.clear();
+            this.input.clear();
+            this.output.clear();
         };
 
         ElementManager.prototype._addElement = function(element) {
@@ -134,7 +152,8 @@ vis.element = (function(vis) {
 
     var construct = {
         axis: function(para) { return new AxisElement(para); },
-        circle: function(para) { return new CircleElement(para); }
+        circle: function(para) { return new CircleElement(para); },
+        data: function(para) { return new DataColumnElement(para); }
     };
 
     return {
