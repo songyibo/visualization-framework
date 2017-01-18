@@ -11,10 +11,10 @@
     text-anchor: middle;
 }
 
-.vis-svg-scatterplot-circle {
+.vis-svg-scatter-circle {
 
 }
 
-.vis-svg-scatterplot-selected {
+.vis-svg-scatter-selected {
 	fill: red;
 }

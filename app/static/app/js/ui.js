@@ -18,23 +18,25 @@ vis.ui = (function(vis) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                selected = true;
-                $(widget).addClass('vis-ui-selected');
-                if (options.select) options.select.call(widget);
+                $.when(
+                    // Unselect other selectable objects.
+                    $(document).triggerHandler('mousedown')
+                ).done(function() {
+                    selected = true;
+                    $(widget).addClass('vis-ui-selected');
+                    if (options.select) options.select.call(widget);
 
-                $(document).on('mousedown.vis-ui-select' + index, function(e, i) {
-                    if (e.which == 1 || i != index) {
-                        // Unbind its own handler.
-                        $(document).off('mousedown.vis-ui-select' + index);
+                    $(document).on('mousedown.vis-ui-select' + index, function(e, i) {
+                        if (e.which == 1 || i != index) {
+                            // Unbind its own handler.
+                            $(document).off('mousedown.vis-ui-select' + index);
 
-                        selected = false;
-                        $(widget).removeClass('vis-ui-selected');
-                        if (options.cancel) options.cancel.call(widget);
-                    }
+                            selected = false;
+                            $(widget).removeClass('vis-ui-selected');
+                            if (options.cancel) options.cancel.call(widget);
+                        }
+                    });
                 });
-
-                // Unselect other selectable objects.
-                $(document).triggerHandler('mousedown', index);
             }
         });
     }
@@ -59,7 +61,7 @@ vis.ui = (function(vis) {
                     var x = x0 + dx, y = y0 + dy;
                     $(widget).css('left', x).css('top', y);
 
-                    if (options.drag) options.drag.call(widget); // Dragging callback.
+                    if (options.drag) options.drag.call(widget, x, y); // Dragging callback.
                 });
 
                 $(widget).on('mouseup.vis-ui-drag', function(e) {
@@ -160,9 +162,9 @@ vis.ui = (function(vis) {
                     pos.w = (pos.w > wMax) ? wMax : pos.w;
                     pos.h = (pos.h > hMax) ? hMax : pos.h;
 
-                    $(widget).css({ left: pos.x, top: pos.y, width: pos.w, height: pos.h });
+                    $(widget).css({left: pos.x, top: pos.y, width: pos.w, height: pos.h});
 
-                    if (options.resize) options.resize.call(widget, pos); // Resizing callback.
+                    if (options.resize) options.resize.call(widget, pos.x, pos.y, pos.w, pos.h); // Resizing callback.
                 });
 
                 // This event cannot be bound at the handle elements.

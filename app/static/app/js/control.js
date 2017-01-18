@@ -6,14 +6,12 @@ vis.control = (function(vis) {
         this.widgetCanvas = 'vis-widget-canvas';
         this.svgCanvas = 'vis-svg-canvas';
 
-        this.$panel = $('.side-panel-content');
+        this.panel = $('.side-panel').get(0);
 
-        this.datasets = {};
-        this.modules = [];
+        this.datasets = new vis.util.OrderedDict();
+        this.modules = new vis.util.OrderedDict();
 
-        this.pendingLine = d3.select('#' + this.svgCanvas).append('line')
-            .attr('class', 'vis-svg-pending')
-            .style('stroke', 'black');
+        this.canvasManager = new vis.svg.CanvasManager(this.svgCanvas);
     }
 
     Controller.prototype.hasDataset = function(dataset) {
@@ -21,32 +19,30 @@ vis.control = (function(vis) {
     };
 
     Controller.prototype.getDataset = function(dataset) {
-        return this.datasets[dataset] || null;
+        return this.datasets.get(dataset) || null;
     };
 
     Controller.prototype.addDataset = function(dataset) {
         var $this = this;
-
         if (!this.datasets[dataset]) {
-            vis.network.getDataset(dataset, function(response) {
-                $this.datasets[dataset] = response;
+            return vis.network.getDataset(dataset, function(response) {
+                $this.datasets.push(dataset, response);
                 // Temporarily for tabular data: passing column parameter in.
-                $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
+                // $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
             });
-        } else {
-            var ds = this.datasets[dataset];
-            $this._updateDataSources(ds.name, ds.columns.map(function(c) { return c.name; }));
         }
     };
 
     Controller.prototype.drawPendingConnection = function(x1, y1, x2, y2) {
-        var c = vis.control.instance();
-        c.pendingLine.attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+        this.canvasManager.drawLine(x1, y1, x2, y2);
     };
 
     Controller.prototype.clearPendingConnection = function() {
-        var c = vis.control.instance();
-        c.pendingLine.attr('x1', '').attr('y1', '').attr('x2', '').attr('y2', '');
+        this.canvasManager.resetLine();
+    };
+
+    Controller.prototype.drawConnection = function(portStart, portEnd) {
+
     };
 
     Controller.prototype.setConnectSource = function(source) {
@@ -87,29 +83,21 @@ vis.control = (function(vis) {
     Controller.prototype.createModule = function(name, x, y) {
         var make = vis.module.construct[name];
         if (!make) {
-            console.warn('Module create failed: ' + name);
+            console.warn('Module creation failed: ' + name);
             return;
         }
 
         var module = make();
         if (module) {
             module.init(this.widgetCanvas, {x: x, y: y});
-            this.modules.push(module);
+            this.modules.push(module.id, module);
         }
     };
 
-    Controller.prototype.setPanel = function(name) {
-        name = name || 'main';
-
-        var exist = $('#vis-panel-' + name);
-        this.$panel.children().hide();
-        if (exist.get(0)) {
-            exist.show();
-        } else {
-            var panelHtml = $('#vis-template-' + name).html();
-            var tab = $('<div>').attr('id', 'vis-panel-' + name).html(panelHtml);
-            this.$panel.append(tab);
-        }
+    Controller.prototype.setPanel = function(id) {
+        id = id || 'vis-panel-main';
+        $(this.panel).children().hide();
+        $('#' + id).show();
     };
 
     var controller = null;
@@ -124,17 +112,19 @@ vis.control = (function(vis) {
 
             // $(document).on('contextmenu', function(e) { e.preventDefault(); });
 
-            $(document).on('click', '.side-panel-box', function(e) {
+            $(control.panel).html($('#vis-template-main').html());
+            $(control.panel).children('.side-panel-container').on('click', '.side-panel-box', function(e) {
                 e.stopPropagation();
-                var m = $(this).attr('data-module');
-                if (m) {
+                var moduleName = $(this).attr('data-module');
+                if (moduleName) {
                     var $c = $('#' + control.svgCanvas);
                     var w = $c.width(), h = $c.height();
-                    vis.control.instance().createModule(m, w / 3, h / 3);
+                    control.createModule(moduleName, w / 3, h / 3);
                 }
             });
+            $(control.panel).on('mousedown', function(e) { e.stopPropagation(); });
 
-            vis.control.instance().setPanel();
+            control.setPanel();
         });
     })();
 

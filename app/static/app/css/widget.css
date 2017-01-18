@@ -17,6 +17,12 @@
     margin: 10px;
 }
 
+.vis-widget-svg-container {
+    background-color: rgb(254, 254, 254);
+    cursor: auto;
+    margin: 10px;
+}
+
 .vis-widget-button {
     position: absolute;
     top: 10px;
@@ -32,11 +38,5 @@
 
 .vis-widget-select-wrapper {
     text-align: center;
-    margin: 10px;
-}
-
-.vis-widget-container {
-    background-color: rgb(254, 254, 254);
-    cursor: auto;
     margin: 10px;
 }

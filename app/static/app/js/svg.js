@@ -2,8 +2,8 @@ var vis = vis || {};
 
 vis.svg = (function(vis) {
 
-    var Scatterplot = (function() {
-        function Scatterplot(widgetID) {
+    var ScatterPlot = (function() {
+        function ScatterPlot(widgetID) {
             this.wid = widgetID;
             this.config = {};
 
@@ -41,7 +41,7 @@ vis.svg = (function(vis) {
             this._setup();
         }
 
-        Scatterplot.prototype.resize = function(w, h) {
+        ScatterPlot.prototype.resize = function(w, h) {
             if (this.fullWidth == w && this.fullHeight == h) return;
 
             this.fullWidth = w; this.fullHeight = h;
@@ -72,11 +72,11 @@ vis.svg = (function(vis) {
             var $this = this;
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
-                $this.render($this.data, $this.config);
+                $this._render($this.data, $this.config);
             }, 400);
         };
 
-        Scatterplot.prototype.render = function(data, config) {
+        ScatterPlot.prototype._render = function(data, config) {
             if (!data || !config) return;
             this.data = data;
             for (var c in config) {
@@ -84,10 +84,10 @@ vis.svg = (function(vis) {
             }
             if (!this.config.x || !this.config.y) return;
 
-            var x = this.xDataToPlot, y = this.yDataToPlot, config = this.config;
+            var x = this.xDataToPlot, y = this.yDataToPlot, conf = this.config;
 
-            x.domain(d3.extent(this.data, function(d) { return d[config.x]; })).nice();
-            y.domain(d3.extent(this.data, function(d) { return d[config.y]; })).nice();
+            x.domain(d3.extent(this.data, function(d) { return d[conf.x]; })).nice();
+            y.domain(d3.extent(this.data, function(d) { return d[conf.y]; })).nice();
 
             this.container.select('.vis-svg-axis-x')
                 .call(this.xAxis);
@@ -95,33 +95,33 @@ vis.svg = (function(vis) {
             this.container.select('.vis-svg-axis-y')
                 .call(this.yAxis);
 
-            var nodes = this.container.selectAll('.vis-svg-scatterplot-circle')
+            var nodes = this.container.selectAll('.vis-svg-scatter-circle')
                 .data(this.data);
 
             this.config.duration = 400;
 
-            nodes.transition().duration(config.duration)
-                .attr('r', function(d) { return d[config.size] || 3 })
-                .attr('cx', function(d) { return x(d[config.x]); })
-                .attr('cy', function(d) { return y(d[config.y]); });
+            nodes.transition().duration(conf.duration)
+                .attr('r', function(d) { return d[conf.size] || 3 })
+                .attr('cx', function(d) { return x(d[conf.x]); })
+                .attr('cy', function(d) { return y(d[conf.y]); });
 
             nodes.enter().append('circle')
-                .attr('class', 'vis-svg-scatterplot-circle')
-                .attr('r', function(d) { return d[config.size] || 3 })
-                .attr('cx', function(d) { return x(d[config.x]); })
-                .attr('cy', function(d) { return y(d[config.y]); })
+                .attr('class', 'vis-svg-scatter-circle')
+                .attr('r', function(d) { return d[conf.size] || 3 })
+                .attr('cx', function(d) { return x(d[conf.x]); })
+                .attr('cy', function(d) { return y(d[conf.y]); })
                 .attr('fill', 'slategrey')
                 .attr('fill-opacity', 0)
-                .transition().duration(config.duration)
+                .transition().duration(conf.duration)
                 .attr('fill-opacity', 1);
 
             nodes.exit()
-                .transition().duration(config.duration)
+                .transition().duration(conf.duration)
                 .style('fill-opacity', 0)
                 .remove();
         };
 
-        Scatterplot.prototype._setup = function() {
+        ScatterPlot.prototype._setup = function() {
             this.selection = {};
 
             var shift = false;
@@ -151,7 +151,7 @@ vis.svg = (function(vis) {
                         // Clear selection if not holding ctrl key.
                         if (!$this.pending) $this.selection = {};
 
-                        // Draw selection if the scatterplot is not empty.
+                        // Draw selection if the scatter plot is not empty.
                         if (config.x && config.y) {
                             var s = d3.event.selection;
                             $this.container.selectAll('circle')
@@ -161,13 +161,13 @@ vis.svg = (function(vis) {
                                         $this.selection[i] = true;
                                     }
                                 })
-                                .classed('vis-svg-scatterplot-selected', function(d, i) { return $this.selection[i]; });
+                                .classed('vis-svg-scatter-selected', function(d, i) { return $this.selection[i]; });
                         }
 
                         // Avoid clearing selected data after a valid selection (including empty selection).
                         $this.maintainSelection = true;
 
-                        // Clear the brush. Even when scatterplot is empty.
+                        // Clear the brush. Even when scatter plot is empty.
                         // Attention! This call will asynchronously fire another brush process with an empty selection.
                         $this.container.select('.brush').call($this.brush.move, null);
 
@@ -179,7 +179,7 @@ vis.svg = (function(vis) {
                             // Click blank area will fire 'end' with empty selection. D3 originally uses this for clear the brush.
                             $this.selection = {};
                             $this.container.selectAll('circle')
-                                .classed('vis-svg-scatterplot-selected', false);
+                                .classed('vis-svg-scatter-selected', false);
                         }
                     }
                 });
@@ -189,7 +189,7 @@ vis.svg = (function(vis) {
                 .call(this.brush);
         };
 
-        return Scatterplot;
+        return ScatterPlot;
     })();
 
     var CustomCanvas = (function() {
@@ -223,18 +223,47 @@ vis.svg = (function(vis) {
             var $this = this;
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
-                $this.render($this.data, $this.config);
+                $this._render($this.data, $this.config);
             }, 400);
         };
 
-        CustomCanvas.prototype.render = function(data, config) {
+        CustomCanvas.prototype._render = function(data, config) {
         };
 
         return CustomCanvas;
     })();
 
+    var CanvasManager = (function() {
+        function CanvasManager(canvasID) {
+            this.cid = canvasID;
+            this.svg = d3.select('#' + this.cid);
+            this.line = this.svg.append('line')
+                .attr('class', 'vis-svg-pending')
+                .style('stroke', 'black');
+        }
+
+        CanvasManager.prototype.drawLine = function(x1, y1, x2, y2) {
+            this.line.attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+        };
+
+        CanvasManager.prototype.resetLine = function() {
+            this.line.attr('x1', '').attr('y1', '').attr('x2', '').attr('y2', '');
+        };
+
+        CanvasManager.prototype.addPath = function() {};
+
+        return CanvasManager;
+    })();
+
+    var construct = {
+        'scatter-plot': function(widgetID) { return new ScatterPlot(widgetID); }
+    };
+
     return {
-        Scatterplot: Scatterplot,
-        CustomCanvas: CustomCanvas
+        ScatterPlot: ScatterPlot,
+        CustomCanvas: CustomCanvas,
+        CanvasManager: CanvasManager,
+
+        construct: construct
     };
 })(vis);
