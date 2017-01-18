@@ -72,11 +72,11 @@ vis.svg = (function(vis) {
             var $this = this;
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
-                $this.render($this.data, $this.config);
+                $this._render($this.data, $this.config);
             }, 400);
         };
 
-        ScatterPlot.prototype.render = function(data, config) {
+        ScatterPlot.prototype._render = function(data, config) {
             if (!data || !config) return;
             this.data = data;
             for (var c in config) {
@@ -223,11 +223,11 @@ vis.svg = (function(vis) {
             var $this = this;
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
-                $this.render($this.data, $this.config);
+                $this._render($this.data, $this.config);
             }, 400);
         };
 
-        CustomCanvas.prototype.render = function(data, config) {
+        CustomCanvas.prototype._render = function(data, config) {
         };
 
         return CustomCanvas;

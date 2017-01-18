@@ -146,7 +146,7 @@ vis.widget = (function(vis) {
             options = options || {};
 
             this.w = options.w || 200;
-            this.h = options.h || 300;
+            this.h = options.h || 200;
             this.wMin = options.minWidth || 150;
             this.hMin = options.minHeight || 200;
         }

@@ -10,13 +10,10 @@ vis.module = (function(vis) {
         function Module() {
             this.name = 'module';
             this.displayName = 'Module';
-            this.templateName = 'panel';
             this.id = '';
 
             this.widget = null;
             this.panel = null;
-
-            this.elements = null;
             this.ports = null;
 
             this.conf = {};
@@ -27,32 +24,17 @@ vis.module = (function(vis) {
                 this.widget.init(canvasID, position);
                 this.widget.update();
             }
-            if (this.elements) {
-                this.elements.init(this.conf.elements);
-                if (this.panel) {
-                    this.panel.load(this.templateName);
-                    var context = {
-                        id: 'vis-panel-' + this.id,
-                        module: this.id,
-                        custom: false,
-                        elements: this.elements.panelConfig()
-                    };
-                    this.panel.render(context);
-                }
-                if (this.ports) {
-                    this.ports.init(this.widget.element);
-                    var ports = this.elements.portConfig();
-                    for (var i in ports) {
-                        this.ports.add(ports[i]);
-                    }
-                    this.ports.resize();
-                }
+            if (this.panel) {
+                this.panel.init(this.conf.elements);
+            }
+            if (this.ports) {
+                this.ports.init(this.widget.element, this.conf.elements);
             }
             return this;
         };
 
         Module.prototype.select = function() {
-            vis.control.instance().setPanel(this.panel);
+            vis.control.instance().setPanel(this.panelID);
         };
 
         Module.prototype.unselect = function() {
@@ -61,18 +43,6 @@ vis.module = (function(vis) {
 
         Module.prototype.resize = function() {
             this.ports.resize();
-        };
-
-        Module.prototype.toggleAttr = function(elementID, attrName, type) {
-            this.elements.toggleAttr(elementID, attrName);
-            this.ports.togglePort(elementID, attrName, type);
-            this.ports.resize();
-            this.panel.render({
-                id: 'vis-panel-' + this.id,
-                module: this.id,
-                custom: false,
-                elements: this.elements.panelConfig()
-            });
         };
 
         return Module;
@@ -91,14 +61,15 @@ vis.module = (function(vis) {
             this.index = DataSourceModule.prototype.counter++;
             this.id = this.name + '-' + this.index;
             this.label = this.displayName + ' ' + this.index;
+            this.panelID = 'vis-panel-' + this.id;
 
             this.widget = new vis.widget.DataSourceWidget(this);
             this.panel = new vis.panel.Panel(this);
-
-            this.elements = new vis.element.ElementManager(this);
             this.ports = new vis.port.PortManager(this);
 
             this.conf = {
+                id: this.id,
+                panel: this.panelID,
                 elements: []
             };
         }
@@ -112,20 +83,30 @@ vis.module = (function(vis) {
                 $.when(
                     vis.control.instance().addDataset(dataset)
                 ).done(function() {
-                    var data = vis.control.instance().getDataset(dataset);
-                    $this.elements.clear();
-                    $this.ports.clear();
-                    var attrs = [];
-                    for (var i in data.columns) {
-                        attrs.push({
-                            name: 'data', type: 'input', text: data.columns[i].name
-                        });
-                    }
-                    $this.elements.init([
-                        {element: 'table', type: 'input', name: 'table', text: 'Table Data', attrs: attrs}
-                    ]);
+                    $this.updateData();
+                    $this.resetPorts();
                 });
             }
+        };
+
+        DataSourceModule.prototype.updateData = function() {
+            var data = vis.control.instance().getDataset(this.dataset);
+            this.ports.clear();
+            var attributes = [];
+            for (var i in data.columns) {
+                var c = data.columns[i];
+                attributes.push({
+                    attribute: 'column', name: c.name, text: c.name, active: false
+                });
+            }
+            this.conf.elements = [
+                {element: 'table', type: 'output', name: 'table', text: 'Table Data', attributes: attributes}
+            ];
+            this.panel.reset();
+        };
+
+        DataSourceModule.prototype.resetPorts = function() {
+            this.ports.reset(this.conf.elements);
         };
 
         return DataSourceModule;
@@ -144,18 +125,35 @@ vis.module = (function(vis) {
             this.index = ScatterPlotModule.prototype.counter++;
             this.id = this.name + '-' + this.index;
             this.label = this.displayName + ' ' + this.index;
+            this.panelID = 'vis-panel-' + this.id;
 
             this.widget = new vis.widget.SvgWidget(this);
             this.panel = new vis.panel.Panel(this);
-
-            this.elements = new vis.element.ElementManager(this);
             this.ports = new vis.port.PortManager(this);
 
             this.conf = {
+                module: this.id,
+                panel: this.panelID,
                 elements: [
-                    {element: 'axis', type: 'input', name: 'axis-x', text: 'Axis X', attrs: ['extent']},
-                    {element: 'axis', type: 'input', name: 'axis-y', text: 'Axis Y', attrs: ['extent']},
-                    {element: 'circle', type: 'input', attrs: ['color', 'size']}
+                    {
+                        element: 'axis', type: 'input', name: 'axis-x', text: 'Axis X',
+                        attributes: [
+                            {attribute: 'extent', name: 'extent-x', text: 'Extent', active: true}
+                        ]
+                    },
+                    {
+                        element: 'axis', type: 'input', name: 'axis-y', text: 'Axis Y',
+                        attributes: [
+                            {attribute: 'extent', name: 'extent-y', text: 'Extent', active: true}
+                        ]
+                    },
+                    {
+                        element: 'circle', type: 'input', name: 'circle', text: 'Circle',
+                        attributes: [
+                            {attribute: 'color', name: 'color', text: 'Color', active: true},
+                            {attribute: 'size', name: 'size', text: 'Size', active: false}
+                        ]
+                    }
                 ]
             };
         }

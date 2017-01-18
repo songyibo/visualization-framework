@@ -3,13 +3,14 @@ var vis = vis || {};
 vis.port = (function(vis) {
 
     var Port = (function() {
-        function Port(parent, position) {
+        function Port(module, parent, position) {
             if (!position) position = {};
             this.x = position.x || 0;
             this.y = position.y || 0;
             this.w = position.w || 20;
             this.h = position.h || 20;
 
+            this.module = module;
             this.parent = parent;
             this._createElement(parent);
             this._setConnectAction(this.element);
@@ -19,13 +20,13 @@ vis.port = (function(vis) {
         }
 
         Port.prototype.remove = function() {
+            // TODO: Remove connections here;
             $(this.element).remove();
         };
 
         Port.prototype._createElement = function(parent) {
             var element = $('<div>').addClass('vis-port');
             $(parent).append(element);
-
             this.element = element[0];
         };
 
@@ -33,7 +34,7 @@ vis.port = (function(vis) {
             var $this = this;
             vis.ui.connectable(element, {
                 start: function() {
-                    // Set connections here.
+                    // TODO: Set connections here.
                     $(document).on('vis-connect', function(e, port) {
                         console.log($this, port);
                         $this.dest.push(port);
@@ -42,7 +43,7 @@ vis.port = (function(vis) {
                     });
                 },
                 connect: function(x, y) {
-                    var X = $this.module.x + $this.x, Y = $this.module.y + $this.y;
+                    var X = $this.module.widget.x + $this.x, Y = $this.module.widget.y + $this.y;
                     var x0 = X + $this.w / 2, y0 = Y + $this.h / 2;
                     var x1 = X + x, y1 = Y + y;
                     vis.control.instance().drawPendingConnection(x0, y0, x1, y1);
@@ -89,41 +90,58 @@ vis.port = (function(vis) {
             this.output = new vis.util.OrderedDict();
         }
 
-        PortManager.prototype.init = function(widget) {
+        PortManager.prototype.init = function(widget, elements) {
             var container = $('<div>').addClass('vis-port-container').appendTo(widget);
             this.container = container.get(0);
+
+            this.reset(elements);
+            this.resize();
+        };
+
+        PortManager.prototype.reset = function(elements) {
+            this.clear();
+            for (var i in elements) {
+                var e = elements[i];
+                for (var j in e.attributes) {
+                    var a = e.attributes[j];
+                    if (a.active) {
+                        this.add(this.module.id + '-' + e.name + '-' + a.name, e.type);
+                    }
+                }
+            }
         };
 
         PortManager.prototype.clear = function() {
             for (var i = 0; i < this.all.length; i++) {
                 var p = this.all.at(i);
-                p.remove();
+                p.port.remove();
             }
             this.all.clear();
             this.input.clear();
             this.output.clear();
         };
 
-        PortManager.prototype.add = function(c) {
-            var p = new Port(this.container);
+        PortManager.prototype.add = function(id, type) {
+            var p = new Port(this.module, this.container);
             var port = {
-                id: c.element + '-' + c.attr,
-                type: c.type,
+                id: id,
+                type: type,
                 port: p
             };
 
             this.all.push(port.id, port);
-            if (c.type == 'input') {
+            if (type == 'input') {
                 this.input.push(port.id);
-            } else if (c.type == 'output') {
+            } else if (type == 'output') {
                 this.output.push(port.id);
             } else {
                 console.warn('Unknown port type.');
             }
+
+            this.resize();
         };
 
-        PortManager.prototype.remove = function(c) {
-            var id = c.element + '-' + c.attr;
+        PortManager.prototype.remove = function(id) {
             var p = this.all.get(id);
             if (p) {
                 p.port.remove();
@@ -136,24 +154,8 @@ vis.port = (function(vis) {
                     console.warn('Unknown port type.');
                 }
             }
-        };
 
-        PortManager.prototype.togglePort = function(elementID, attrName, type) {
-            var id = elementID + '-' + attrName;
-            var p = this.all.get(id);
-            if (p) {
-                // TODO: Remove connections.
-                this.remove({
-                    element: elementID,
-                    attr: attrName
-                });
-            } else {
-                this.add({
-                    element: elementID,
-                    type: type,
-                    attr: attrName
-                });
-            }
+            this.resize();
         };
 
         PortManager.prototype.resize = function() {

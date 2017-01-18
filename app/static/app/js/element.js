@@ -96,57 +96,6 @@ vis.element = (function(vis) {
             }
         };
 
-        ElementManager.prototype.panelConfig = function() {
-            var result = [];
-            for (var i = 0; i < this.all.length; i++) {
-                var element = this.all.at(i);
-                var attrs = [];
-                for (var k in element.attrs) {
-                    var attr = element.attrs[k];
-                    attrs.push({
-                        name: attr.name,
-                        text: attr.text,
-                        checked: attr.enabled
-                    });
-                }
-                result.push({
-                    id: element.id,
-                    name: element.name,
-                    text: element.text,
-                    type: element.type,
-                    attrs: attrs
-                });
-            }
-            return result;
-        };
-
-        ElementManager.prototype.portConfig = function() {
-            var result = [];
-            for (var i = 0; i < this.all.length; i++) {
-                var element = this.all.at(i);
-                for (var k in element.attrs) {
-                    var attr = element.attrs[k];
-                    if (attr.enabled) {
-                        result.push({
-                            module: this.module.id,
-                            element: element.id,
-                            type: element.type,
-                            attr: attr.name
-                        });
-                    }
-                }
-            }
-            return result;
-        };
-
-        ElementManager.prototype.toggleAttr = function(elementID, attrName) {
-            var element = this.all.get(elementID);
-            if (element) {
-                var attr = element.attrs[attrName];
-                attr.enabled = !attr.enabled;
-            }
-        };
-
         return ElementManager;
     })();
 
