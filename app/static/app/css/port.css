@@ -7,3 +7,17 @@
 
 .vis-port-container {
 }
+
+.vis-port label {
+    left: 22px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.vis-port > div {
+    position: absolute;
+    left: 22px;
+    display: inline-block;
+    background-color: white;
+    opacity: 0.9;
+}

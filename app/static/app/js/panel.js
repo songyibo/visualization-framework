@@ -44,7 +44,7 @@ vis.panel = (function(vis) {
                                     if (attributes[j].active) {
                                         $this.module.ports.remove(id);
                                     } else {
-                                        $this.module.ports.add(id, type);
+                                        $this.module.ports.add(id, type, attributes[j].text);
                                     }
                                     attributes[j].active = !attributes[j].active;
                                     $(this).toggleClass('checked');

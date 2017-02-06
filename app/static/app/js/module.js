@@ -68,7 +68,7 @@ vis.module = (function(vis) {
             this.ports = new vis.port.PortManager(this);
 
             this.conf = {
-                id: this.id,
+                module: this.id,
                 panel: this.panelID,
                 elements: []
             };
@@ -152,6 +152,12 @@ vis.module = (function(vis) {
                         attributes: [
                             {attribute: 'color', name: 'color', text: 'Color', active: true},
                             {attribute: 'size', name: 'size', text: 'Size', active: false}
+                        ]
+                    },
+                    {
+                        element: 'selection', type: 'output', name: 'selection', text: 'Mouse Select',
+                        attributes: [
+                            {attribute: 'brush', name: 'brush', text: 'Brush', active: false}
                         ]
                     }
                 ]

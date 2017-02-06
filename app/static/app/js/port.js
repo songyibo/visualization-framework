@@ -3,7 +3,7 @@ var vis = vis || {};
 vis.port = (function(vis) {
 
     var Port = (function() {
-        function Port(module, parent, position) {
+        function Port(module, parent, text, position) {
             if (!position) position = {};
             this.x = position.x || 0;
             this.y = position.y || 0;
@@ -12,7 +12,7 @@ vis.port = (function(vis) {
 
             this.module = module;
             this.parent = parent;
-            this._createElement(parent);
+            this._createElement(parent, text);
             this._setConnectAction(this.element);
 
             this.source = [];
@@ -24,9 +24,15 @@ vis.port = (function(vis) {
             $(this.element).remove();
         };
 
-        Port.prototype._createElement = function(parent) {
+        Port.prototype._createElement = function(parent, text) {
             var element = $('<div>').addClass('vis-port');
+            var l = $('<label>').text(text);
+            var label = $('<div>').append(l).hide();
+            element.on('mouseenter', function() { label.show(); });
+            element.on('mouseleave', function() { label.hide(); });
+            element.append(label);
             $(parent).append(element);
+            this.label = l[0];
             this.element = element[0];
         };
 
@@ -105,7 +111,7 @@ vis.port = (function(vis) {
                 for (var j in e.attributes) {
                     var a = e.attributes[j];
                     if (a.active) {
-                        this.add(this.module.id + '-' + e.name + '-' + a.name, e.type);
+                        this.add(this.module.id + '-' + e.name + '-' + a.name, e.type, a.text);
                     }
                 }
             }
@@ -121,8 +127,8 @@ vis.port = (function(vis) {
             this.output.clear();
         };
 
-        PortManager.prototype.add = function(id, type) {
-            var p = new Port(this.module, this.container);
+        PortManager.prototype.add = function(id, type, text) {
+            var p = new Port(this.module, this.container, text);
             var port = {
                 id: id,
                 type: type,

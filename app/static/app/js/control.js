@@ -14,10 +14,6 @@ vis.control = (function(vis) {
         this.canvasManager = new vis.svg.CanvasManager(this.svgCanvas);
     }
 
-    Controller.prototype.hasDataset = function(dataset) {
-        return !!(this.datasets[dataset]);
-    };
-
     Controller.prototype.getDataset = function(dataset) {
         return this.datasets.get(dataset) || null;
     };
@@ -65,18 +61,6 @@ vis.control = (function(vis) {
 
         if (s.type == 'data') {
             t.setAxisInput(this.datasets[dataset].data.root, dataset, data);
-        }
-    };
-
-    Controller.prototype._updateDataSources = function(dataset, columns) {
-        // Implemented for tabular data.
-        for (var i in this.modules) {
-            var m = this.modules[i];
-            if (m.name == 'Data Source') {
-                if (m.dataset == dataset) {
-                    m.setDataPort(columns);
-                }
-            }
         }
     };
 
