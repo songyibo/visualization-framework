@@ -233,37 +233,12 @@ vis.svg = (function(vis) {
         return CustomCanvas;
     })();
 
-    var CanvasManager = (function() {
-        function CanvasManager(canvasID) {
-            this.cid = canvasID;
-            this.svg = d3.select('#' + this.cid);
-            this.line = this.svg.append('line')
-                .attr('class', 'vis-svg-pending')
-                .style('stroke', 'black');
-        }
-
-        CanvasManager.prototype.drawLine = function(x1, y1, x2, y2) {
-            this.line.attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
-        };
-
-        CanvasManager.prototype.resetLine = function() {
-            this.line.attr('x1', '').attr('y1', '').attr('x2', '').attr('y2', '');
-        };
-
-        CanvasManager.prototype.addPath = function() {};
-
-        return CanvasManager;
-    })();
-
     var construct = {
         'scatter-plot': function(widgetID) { return new ScatterPlot(widgetID); }
     };
 
     return {
         ScatterPlot: ScatterPlot,
-        CustomCanvas: CustomCanvas,
-        CanvasManager: CanvasManager,
-
         construct: construct
     };
 })(vis);

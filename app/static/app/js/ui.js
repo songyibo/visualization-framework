@@ -217,12 +217,6 @@ vis.ui = (function(vis) {
             }
         });
 
-        $(widget).on('mousemove.vis-ui-connect', function(e) {
-            if (e.which == 3) {
-                e.stopPropagation();
-            }
-        });
-
         // Exit 2. Connection ends on Target.
         $(widget).on('mouseup.vis-ui-connect', function(e) {
             if (e.which == 3) {

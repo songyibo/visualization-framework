@@ -11,7 +11,7 @@ vis.control = (function(vis) {
         this.datasets = new vis.util.OrderedDict();
         this.modules = new vis.util.OrderedDict();
 
-        this.canvasManager = new vis.svg.CanvasManager(this.svgCanvas);
+        this.connections = new vis.connection.ConnectControl(this.svgCanvas);
     }
 
     Controller.prototype.getDataset = function(dataset) {
@@ -27,18 +27,6 @@ vis.control = (function(vis) {
                 // $this._updateDataSources(response.name, response.columns.map(function(c) { return c.name; }));
             });
         }
-    };
-
-    Controller.prototype.drawPendingConnection = function(x1, y1, x2, y2) {
-        this.canvasManager.drawLine(x1, y1, x2, y2);
-    };
-
-    Controller.prototype.clearPendingConnection = function() {
-        this.canvasManager.resetLine();
-    };
-
-    Controller.prototype.drawConnection = function(portStart, portEnd) {
-
     };
 
     Controller.prototype.setConnectSource = function(source) {
@@ -84,12 +72,6 @@ vis.control = (function(vis) {
         $('#' + id).show();
     };
 
-    var controller = null;
-
-    function createController() {
-        return new Controller();
-    }
-
     (function setup() {
         $(document).ready(function() {
             var control = vis.control.instance();
@@ -112,10 +94,11 @@ vis.control = (function(vis) {
         });
     })();
 
+    var controller = null;
     return {
         instance: function() {
             if (!controller) {
-                controller = createController();
+                controller = new Controller();
             }
             return controller;
         }

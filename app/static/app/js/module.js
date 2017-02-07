@@ -45,6 +45,10 @@ vis.module = (function(vis) {
             this.ports.resize();
         };
 
+        Module.prototype.move = function() {
+            this.ports.move();
+        };
+
         return Module;
     })();
 

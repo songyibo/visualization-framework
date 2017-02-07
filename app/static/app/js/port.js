@@ -3,24 +3,27 @@ var vis = vis || {};
 vis.port = (function(vis) {
 
     var Port = (function() {
-        function Port(module, parent, text, position) {
+        function Port(module, obj) {
+            this.module = module;
+            this.obj = obj;
+
+            this.connect = [];
+        }
+
+        Port.prototype.init = function(container, text, position) {
             if (!position) position = {};
             this.x = position.x || 0;
             this.y = position.y || 0;
             this.w = position.w || 20;
             this.h = position.h || 20;
 
-            this.module = module;
-            this.parent = parent;
-            this._createElement(parent, text);
+            this.container = container;
+            this._createElement(container, text);
             this._setConnectAction(this.element);
-
-            this.source = [];
-            this.dest = [];
-        }
+        };
 
         Port.prototype.remove = function() {
-            // TODO: Remove connections here;
+            vis.control.instance().connections.removePort(this);
             $(this.element).remove();
         };
 
@@ -40,23 +43,21 @@ vis.port = (function(vis) {
             var $this = this;
             vis.ui.connectable(element, {
                 start: function() {
-                    // TODO: Set connections here.
                     $(document).on('vis-connect', function(e, port) {
-                        console.log($this, port);
-                        $this.dest.push(port);
-                        port.source.push($this);
-                        vis.control.instance().drawConnection($this, port);
+                        $this.connect.push(port);
+                        port.connect.push($this);
+                        vis.control.instance().connections.add($this, port);
                     });
                 },
                 connect: function(x, y) {
                     var X = $this.module.widget.x + $this.x, Y = $this.module.widget.y + $this.y;
                     var x0 = X + $this.w / 2, y0 = Y + $this.h / 2;
                     var x1 = X + x, y1 = Y + y;
-                    vis.control.instance().drawPendingConnection(x0, y0, x1, y1);
+                    vis.control.instance().connections.drawPending(x0, y0, x1, y1);
                 },
                 cancel: function() {
                     $(document).off('vis-connect');
-                    vis.control.instance().clearPendingConnection();
+                    vis.control.instance().connections.resetPending();
                 },
                 end: function() {
                     $(document).triggerHandler('vis-connect', $this);
@@ -128,18 +129,18 @@ vis.port = (function(vis) {
         };
 
         PortManager.prototype.add = function(id, type, text) {
-            var p = new Port(this.module, this.container, text);
-            var port = {
+            var p = {
                 id: id,
-                type: type,
-                port: p
+                type: type
             };
+            p.port = new Port(this.module, p);
+            p.port.init(this.container, text);
 
-            this.all.push(port.id, port);
+            this.all.push(p.id, p);
             if (type == 'input') {
-                this.input.push(port.id);
+                this.input.push(p.id);
             } else if (type == 'output') {
-                this.output.push(port.id);
+                this.output.push(p.id);
             } else {
                 console.warn('Unknown port type.');
             }
@@ -164,6 +165,19 @@ vis.port = (function(vis) {
             this.resize();
         };
 
+        PortManager.prototype.move = function() {
+            this._move(this.input);
+            this._move(this.output);
+        };
+
+        PortManager.prototype._move = function(dict) {
+            for (var i = 0; i < dict.length; i++) {
+                var k = dict.key(i);
+                var p = this.all.get(k);
+                vis.control.instance().connections.updatePort(p.port);
+            }
+        };
+
         PortManager.prototype.resize = function() {
             var s = this.size, m = this.margin;
             var w = this.module.widget.w, h = this.module.widget.h;
@@ -175,12 +189,11 @@ vis.port = (function(vis) {
             var num = dict.length;
             var t = num * size + (num - 1) * margin;
             var x = start, y = (total - t) / 2;
-            var index = 0;
             for (var i = 0; i < dict.length; i++) {
                 var k = dict.key(i);
                 var p = this.all.get(k);
-                p.port.resize({x: x, y: y + index * (margin + size), w: size, h: size});
-                index++;
+                p.port.resize({x: x, y: y + i * (margin + size), w: size, h: size});
+                vis.control.instance().connections.updatePort(p.port);
             }
         };
 

@@ -80,6 +80,7 @@ vis.widget = (function(vis) {
             vis.ui.draggable(element, {
                 drag: function(x, y) {
                     $this.setPosition({x: x, y: y});
+                    $this.module.move();
                 }
             });
         };
