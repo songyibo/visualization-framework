@@ -25,10 +25,10 @@ vis.connection = (function(vis) {
         c.path = this.svg.append('path')
             .attr('class', 'vis-connect-curve')
             .attr('d', function() {
-                var sx = start.module.widget.x + start.x + start.w / 2;
-                var sy = start.module.widget.y + start.y + start.h / 2;
-                var ex = end.module.widget.x + end.x + end.w / 2;
-                var ey = end.module.widget.y + end.y + end.h / 2;
+                var sx = start.module.widget.x + start.widget.x + start.widget.w / 2;
+                var sy = start.module.widget.y + start.widget.y + start.widget.h / 2;
+                var ex = end.module.widget.x + end.widget.x + end.widget.w / 2;
+                var ey = end.module.widget.y + end.widget.y + end.widget.h / 2;
                 var mx = (sx + ex) / 2;
                 return ('M' + sx + ',' + sy + 'C' + mx + ',' + sy + ' ' + mx + ',' + ey + ' ' + ex + ',' + ey);
             });
@@ -44,33 +44,33 @@ vis.connection = (function(vis) {
     };
 
     ConnectControl.prototype._id = function(start, end) {
-        return 's-' + start.obj.id + '-e-' + end.obj.id;
+        return 's-' + start.id + '-e-' + end.id;
     };
 
     ConnectControl.prototype.removePort = function(port) {
-        for (var i in port.connect) {
-            var p = port.connect[i];
-            var id = port.obj.type == 'input' ? this._id(p, port) : this._id(port, p);
+        for (var i = 0; i < port.connect.length; i++) {
+            var p = port.connect.at(i);
+            var id = port.type == 'input' ? this._id(p, port) : this._id(port, p);
             this.remove(id);
         }
     };
 
     ConnectControl.prototype.updatePort = function(port) {
-        for (var i in port.connect) {
-            var p = port.connect[i];
+        for (var i = 0; i < port.connect.length; i++) {
+            var p = port.connect.at(i);
 
-            var s = port.obj.type == 'input' ? p : port;
-            var e = port.obj.type == 'input' ? port : p;
+            var s = port.type == 'input' ? p : port;
+            var e = port.type == 'input' ? port : p;
 
             var id = this._id(s, e);
             var c = this.connections[id];
             if (c) {
                 c.path.attr('d', function() {
                     var start = s, end = e;
-                    var sx = start.module.widget.x + start.x + start.w / 2;
-                    var sy = start.module.widget.y + start.y + start.h / 2;
-                    var ex = end.module.widget.x + end.x + end.w / 2;
-                    var ey = end.module.widget.y + end.y + end.h / 2;
+                    var sx = start.module.widget.x + start.widget.x + start.widget.w / 2;
+                    var sy = start.module.widget.y + start.widget.y + start.widget.h / 2;
+                    var ex = end.module.widget.x + end.widget.x + end.widget.w / 2;
+                    var ey = end.module.widget.y + end.widget.y + end.widget.h / 2;
                     var mx = (sx + ex) / 2;
                     return ('M' + sx + ',' + sy + 'C' + mx + ',' + sy + ' ' + mx + ',' + ey + ' ' + ex + ',' + ey);
                 });

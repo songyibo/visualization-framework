@@ -3,70 +3,69 @@ var vis = vis || {};
 vis.port = (function(vis) {
 
     var Port = (function() {
-        function Port(module, obj) {
+        function Port(module, options) {
             this.module = module;
-            this.obj = obj;
+            this.widget = null;
 
-            this.connect = [];
+            this.options = options || {};
+            this.id = options.id;
+            this.type = options.type || 'unknown';
+            this.label = options.text || 'label';
+
+            this.data = null;
+
+            this.connect = new vis.util.OrderedDict();
         }
 
-        Port.prototype.init = function(container, text, position) {
-            if (!position) position = {};
-            this.x = position.x || 0;
-            this.y = position.y || 0;
-            this.w = position.w || 20;
-            this.h = position.h || 20;
-
-            this.container = container;
-            this._createElement(container, text);
-            this._setConnectAction(this.element);
+        Port.prototype.init = function(container) {
+            this.widget = new vis.port.Widget(this);
+            this.widget.init(container);
         };
 
         Port.prototype.remove = function() {
             vis.control.instance().connections.removePort(this);
-            $(this.element).remove();
-        };
-
-        Port.prototype._createElement = function(parent, text) {
-            var element = $('<div>').addClass('vis-port');
-            var l = $('<label>').text(text);
-            var label = $('<div>').append(l).hide();
-            element.on('mouseenter', function() { label.show(); });
-            element.on('mouseleave', function() { label.hide(); });
-            element.append(label);
-            $(parent).append(element);
-            this.label = l[0];
-            this.element = element[0];
-        };
-
-        Port.prototype._setConnectAction = function(element) {
-            var $this = this;
-            vis.ui.connectable(element, {
-                start: function() {
-                    $(document).on('vis-connect', function(e, port) {
-                        $this.connect.push(port);
-                        port.connect.push($this);
-                        vis.control.instance().connections.add($this, port);
-                    });
-                },
-                connect: function(x, y) {
-                    var X = $this.module.widget.x + $this.x, Y = $this.module.widget.y + $this.y;
-                    var x0 = X + $this.w / 2, y0 = Y + $this.h / 2;
-                    var x1 = X + x, y1 = Y + y;
-                    vis.control.instance().connections.drawPending(x0, y0, x1, y1);
-                },
-                cancel: function() {
-                    $(document).off('vis-connect');
-                    vis.control.instance().connections.resetPending();
-                },
-                end: function() {
-                    $(document).triggerHandler('vis-connect', $this);
-                    $(document).off('vis-connect');
-                }
-            });
+            this.widget.remove();
         };
 
         Port.prototype.resize = function(position) {
+            this.widget.resize(position);
+        };
+
+        Port.prototype.connectTo = function(port) {
+            this.connect.push(port.id, port);
+        };
+
+        Port.prototype.connectedFrom = function(port) {
+            this.connect.push(port.id, port);
+        };
+
+        return Port;
+    })();
+
+    var Widget = (function() {
+        function Widget(port, options) {
+            options = options || {};
+
+            this.x = options.x || 0;
+            this.y = options.y || 0;
+            this.w = options.w || 20;
+            this.h = options.h || 20;
+
+            this.port = port || null;
+            this.element = null;
+        }
+
+        Widget.prototype.init = function(container) {
+            this.container = container;
+            this._createElement(container);
+            this._setConnectAction(this.element);
+        };
+
+        Widget.prototype.remove = function() {
+            $(this.element).remove();
+        };
+
+        Widget.prototype.resize = function(position) {
             if (position) {
                 this.x = position.x || this.x;
                 this.y = position.y || this.y;
@@ -82,7 +81,46 @@ vis.port = (function(vis) {
             });
         };
 
-        return Port;
+        Widget.prototype._createElement = function(container) {
+            var element = $('<div>').addClass('vis-port');
+            var l = $('<label>').text(this.port.label);
+            var label = $('<div>').append(l).hide();
+            element.on('mouseenter', function() { label.show(); });
+            element.on('mouseleave', function() { label.hide(); });
+            element.append(label);
+            $(container).append(element);
+            this.label = l[0];
+            this.element = element[0];
+        };
+
+        Widget.prototype._setConnectAction = function(element) {
+            var $this = this, thisPort = this.port;
+            vis.ui.connectable(element, {
+                start: function() {
+                    $(document).on('vis-connect', function(e, thatPort) {
+                        vis.control.instance().connections.add(thisPort, thatPort);
+                        thisPort.connectTo(thatPort);
+                        thatPort.connectedFrom(thisPort);
+                    });
+                },
+                connect: function(x, y) {
+                    var X = $this.port.module.widget.x + $this.x, Y = $this.port.module.widget.y + $this.y;
+                    var x0 = X + $this.w / 2, y0 = Y + $this.h / 2;
+                    var x1 = X + x, y1 = Y + y;
+                    vis.control.instance().connections.drawPending(x0, y0, x1, y1);
+                },
+                cancel: function() {
+                    $(document).off('vis-connect');
+                    vis.control.instance().connections.resetPending();
+                },
+                end: function() {
+                    $(document).triggerHandler('vis-connect', thisPort);
+                    $(document).off('vis-connect');
+                }
+            });
+        };
+
+        return Widget;
     })();
 
     var PortManager = (function() {
@@ -129,12 +167,12 @@ vis.port = (function(vis) {
         };
 
         PortManager.prototype.add = function(id, type, text) {
-            var p = {
+            var p = new Port(this.module, {
                 id: id,
-                type: type
-            };
-            p.port = new Port(this.module, p);
-            p.port.init(this.container, text);
+                type: type,
+                text: text
+            });
+            p.init(this.container);
 
             this.all.push(p.id, p);
             if (type == 'input') {
@@ -174,7 +212,7 @@ vis.port = (function(vis) {
             for (var i = 0; i < dict.length; i++) {
                 var k = dict.key(i);
                 var p = this.all.get(k);
-                vis.control.instance().connections.updatePort(p.port);
+                vis.control.instance().connections.updatePort(p);
             }
         };
 
@@ -192,8 +230,8 @@ vis.port = (function(vis) {
             for (var i = 0; i < dict.length; i++) {
                 var k = dict.key(i);
                 var p = this.all.get(k);
-                p.port.resize({x: x, y: y + i * (margin + size), w: size, h: size});
-                vis.control.instance().connections.updatePort(p.port);
+                p.resize({x: x, y: y + i * (margin + size), w: size, h: size});
+                vis.control.instance().connections.updatePort(p);
             }
         };
 
@@ -202,6 +240,7 @@ vis.port = (function(vis) {
 
     return {
         Port: Port,
+        Widget: Widget,
         PortManager: PortManager
     };
 

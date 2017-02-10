@@ -1,7 +1,7 @@
 var vis = vis || {};
 
 vis.util = (function(vis) {
-    function OrderedDict(idName) {
+    function OrderedDict() {
         this.length = 0;
         this.array = [];
         this.dict = {};

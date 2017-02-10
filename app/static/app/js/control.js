@@ -29,29 +29,6 @@ vis.control = (function(vis) {
         }
     };
 
-    Controller.prototype.setConnectSource = function(source) {
-        this.connectSource = source;
-    };
-
-    Controller.prototype.setConnectTarget = function(target) {
-        this.connectTarget = target;
-    };
-
-    Controller.prototype.setSourceData = function(dataset, data) {
-        this.sourceDataset = dataset;
-        this.sourceData = data;
-    };
-
-    Controller.prototype.connect = function() {
-        var s = this.connectSource, t = this.connectTarget;
-        var dataset = this.sourceDataset, data = this.sourceData;
-        if (!s || !t) return;
-
-        if (s.type == 'data') {
-            t.setAxisInput(this.datasets[dataset].data.root, dataset, data);
-        }
-    };
-
     Controller.prototype.createModule = function(name, x, y) {
         var make = vis.module.construct[name];
         if (!make) {
