@@ -17,6 +17,20 @@ vis.connection = (function(vis) {
         this.connections = {};
     }
 
+    ConnectControl.prototype.connect = function(start, end) {
+        this.add(start, end);
+
+        var f1 = vis.attribute.attr[start.attribute];
+        var a1 = f1 ? f1(start) : null;
+        var data = a1 ? a1.data(start.module) : null;
+
+        var f2 = vis.attribute.attr[end.attribute];
+        var a2 = f2 ? f2(end) : null;
+        if (a2) { a2.merge(end.module, data); }
+
+        end.module.update();
+    };
+
     ConnectControl.prototype.add = function(start, end) {
         var id = this._id(start, end);
         this.remove(id);

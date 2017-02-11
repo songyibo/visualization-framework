@@ -12,6 +12,10 @@ vis.port = (function(vis) {
             this.type = options.type || 'unknown';
             this.label = options.text || 'label';
 
+            this.element = options.element;
+            this.attribute = options.attribute;
+            this.name = options.attributeName;
+
             this.data = null;
 
             this.connect = new vis.util.OrderedDict();
@@ -98,7 +102,7 @@ vis.port = (function(vis) {
             vis.ui.connectable(element, {
                 start: function() {
                     $(document).on('vis-connect', function(e, thatPort) {
-                        vis.control.instance().connections.add(thisPort, thatPort);
+                        vis.control.instance().connections.connect(thisPort, thatPort);
                         thisPort.connectTo(thatPort);
                         thatPort.connectedFrom(thisPort);
                     });
@@ -150,7 +154,15 @@ vis.port = (function(vis) {
                 for (var j in e.attributes) {
                     var a = e.attributes[j];
                     if (a.active) {
-                        this.add(this.module.id + '-' + e.name + '-' + a.name, e.type, a.text);
+                        this.add({
+                            id: this.module.id + '-' + e.name + '-' + a.name,
+                            type: e.type,
+                            text: a.text,
+                            element: e.element,
+                            attribute: a.attribute,
+                            elementName: e.name,
+                            attributeName: a.name
+                        });
                     }
                 }
             }
@@ -166,18 +178,14 @@ vis.port = (function(vis) {
             this.output.clear();
         };
 
-        PortManager.prototype.add = function(id, type, text) {
-            var p = new Port(this.module, {
-                id: id,
-                type: type,
-                text: text
-            });
+        PortManager.prototype.add = function(obj) {
+            var p = new Port(this.module, obj);
             p.init(this.container);
 
             this.all.push(p.id, p);
-            if (type == 'input') {
+            if (p.type == 'input') {
                 this.input.push(p.id);
-            } else if (type == 'output') {
+            } else if (p.type == 'output') {
                 this.output.push(p.id);
             } else {
                 console.warn('Unknown port type.');
@@ -189,7 +197,7 @@ vis.port = (function(vis) {
         PortManager.prototype.remove = function(id) {
             var p = this.all.get(id);
             if (p) {
-                p.port.remove();
+                p.remove();
                 this.all.remove(id);
                 if (p.type == 'input') {
                     this.input.remove(p.id);

@@ -3,13 +3,13 @@
     <h3>Module Elements</h3>
     <div class="side-panel-content">
         {{ #elements }}
-        <div class="side-panel-category" data-element="{{ name }}" data-type="{{ type }}">
+        <div class="side-panel-category" data-element="{{ element }}" data-element-name="{{ name }}" data-type="{{ type }}">
             <div class="side-panel-heading">
                 <h4>{{ text }} : {{ type }}</h4>
             </div>
             <div class="side-panel-body">
                 {{ #attributes }}
-                <div class="side-panel-box {{ #active }}checked{{ /active }}" data-attr="{{ name }}">
+                <div class="side-panel-box {{ #active }}checked{{ /active }}" data-attr="{{ attribute }}" data-attr-name="{{ name }}">
                     <span>{{ text }}</span>
                 </div>
                 {{ /attributes }}

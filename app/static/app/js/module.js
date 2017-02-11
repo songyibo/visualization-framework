@@ -17,6 +17,7 @@ vis.module = (function(vis) {
             this.ports = null;
 
             this.conf = {};
+            this.settings = {};
         }
 
         Module.prototype.init = function(canvasID, position) {
@@ -47,6 +48,10 @@ vis.module = (function(vis) {
 
         Module.prototype.move = function() {
             this.ports.move();
+        };
+
+        Module.prototype.update = function() {
+            // To Override here.
         };
 
         return Module;
@@ -169,6 +174,13 @@ vis.module = (function(vis) {
         }
         ScatterPlotModule.prototype = Object.create(Module.prototype);
         ScatterPlotModule.prototype.counter = 1;
+
+        ScatterPlotModule.prototype.update = function() {
+            var dataset = this.settings.dataset;
+            var data = vis.control.instance().getDataset(dataset).data.root;
+            this.widget.svg.render(data, this.settings);
+        };
+
         return ScatterPlotModule;
     })();
 

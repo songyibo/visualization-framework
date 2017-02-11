@@ -72,11 +72,11 @@ vis.svg = (function(vis) {
             var $this = this;
             clearTimeout(this.timer);
             this.timer = setTimeout(function() {
-                $this._render($this.data, $this.config);
+                $this.render($this.data, $this.config);
             }, 400);
         };
 
-        ScatterPlot.prototype._render = function(data, config) {
+        ScatterPlot.prototype.render = function(data, config) {
             if (!data || !config) return;
             this.data = data;
             for (var c in config) {

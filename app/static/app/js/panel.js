@@ -29,10 +29,12 @@ vis.panel = (function(vis) {
         $(this.panel).on('click', '.side-panel-box', function(e) {
             e.stopPropagation();
 
-            var attributeName = $(this).attr('data-attr');
+            var attribute = $(this).attr('data-attr')
+            var attributeName = $(this).attr('data-attr-name');
             if (attributeName) {
                 var type = $(this).closest('.side-panel-category').attr('data-type');
-                var elementName = $(this).closest('.side-panel-category').attr('data-element');
+                var element = $(this).closest('.side-panel-category').attr('data-element');
+                var elementName = $(this).closest('.side-panel-category').attr('data-element-name');
                 if (elementName) {
                     var elements = $this.module.conf.elements;
                     for (var i in elements) {
@@ -44,7 +46,15 @@ vis.panel = (function(vis) {
                                     if (attributes[j].active) {
                                         $this.module.ports.remove(id);
                                     } else {
-                                        $this.module.ports.add(id, type, attributes[j].text);
+                                        $this.module.ports.add({
+                                            id: id,
+                                            type: type,
+                                            text: attributes[j].text,
+                                            element: element,
+                                            attribute: attribute,
+                                            elementName: elementName,
+                                            attributeName: attributeName
+                                        });
                                     }
                                     attributes[j].active = !attributes[j].active;
                                     $(this).toggleClass('checked');
