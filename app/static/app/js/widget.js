@@ -58,6 +58,10 @@ vis.widget = (function(vis) {
             this.updateComponents();
         };
 
+        Widget.prototype.refresh = function(data, settings) {
+            // To override here.
+        };
+
         Widget.prototype._createElement = function(container) {
             var div = $('<div>').addClass('vis-widget').appendTo(container);
             return div.get(0);
@@ -121,6 +125,10 @@ vis.widget = (function(vis) {
             this.svg.resize(this.w - 22, this.h - 60);
         };
 
+        SvgWidget.prototype.refresh = function(data, settings) {
+            this.svg.render(data, settings);
+        };
+
         SvgWidget.prototype._createElement = function(container) {
             var element = Widget.prototype._createElement.call(this, container);
 
@@ -130,7 +138,7 @@ vis.widget = (function(vis) {
 
             var make = vis.svg.construct[this.module.name];
             if (make) {
-                this.svg = make(svgContainer.attr('id'));
+                this.svg = make(this.module, svgContainer.attr('id'));
             } else {
                 console.warn('SVG creation failed: ' + this.module.name);
             }

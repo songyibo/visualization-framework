@@ -54,6 +54,11 @@ vis.module = (function(vis) {
             // To Override here.
         };
 
+        Module.prototype.trigger = function() {
+            // TODO: Update downstream modules.
+            // What if A->B, A->C, B->C?
+        };
+
         return Module;
     })();
 
@@ -145,15 +150,10 @@ vis.module = (function(vis) {
                 panel: this.panelID,
                 elements: [
                     {
-                        element: 'axis', type: 'input', name: 'axis-x', text: 'Axis X',
+                        element: 'axis', type: 'input', name: 'axis', text: 'Axis',
                         attributes: [
-                            {attribute: 'extent', name: 'extent-x', text: 'Extent', active: true}
-                        ]
-                    },
-                    {
-                        element: 'axis', type: 'input', name: 'axis-y', text: 'Axis Y',
-                        attributes: [
-                            {attribute: 'extent', name: 'extent-y', text: 'Extent', active: true}
+                            {attribute: 'extent', name: 'extent-x', text: 'Extent X', active: true},
+                            {attribute: 'extent', name: 'extent-y', text: 'Extent Y', active: true}
                         ]
                     },
                     {
@@ -161,6 +161,12 @@ vis.module = (function(vis) {
                         attributes: [
                             {attribute: 'color', name: 'color', text: 'Color', active: true},
                             {attribute: 'size', name: 'size', text: 'Size', active: false}
+                        ]
+                    },
+                    {
+                        element: 'highlight', type: 'input', name: 'highlight', text: 'Selection Highlight',
+                        attributes: [
+                            {attribute: 'highlight', name: 'highlight', text: 'Highlight', active: false}
                         ]
                     },
                     {
@@ -176,9 +182,9 @@ vis.module = (function(vis) {
         ScatterPlotModule.prototype.counter = 1;
 
         ScatterPlotModule.prototype.update = function() {
-            var dataset = this.settings.dataset;
-            var data = vis.control.instance().getDataset(dataset).data.root;
-            this.widget.svg.render(data, this.settings);
+            var data = vis.control.instance().getDataset(this.settings.dataset).data.root;
+            this.widget.refresh(data, this.settings);
+            this.trigger();
         };
 
         return ScatterPlotModule;

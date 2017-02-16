@@ -3,7 +3,8 @@ var vis = vis || {};
 vis.svg = (function(vis) {
 
     var ScatterPlot = (function() {
-        function ScatterPlot(widgetID) {
+        function ScatterPlot(module, widgetID) {
+            this.module = module;
             this.wid = widgetID;
             this.config = {};
 
@@ -119,6 +120,13 @@ vis.svg = (function(vis) {
                 .transition().duration(conf.duration)
                 .style('fill-opacity', 0)
                 .remove();
+
+            if (config.highlight) {
+                var $this = this;
+                this.highlight = config.highlight;
+                this.container.selectAll('circle')
+                    .classed('vis-svg-scatter-highlighted', function(d, i) { return $this.highlight[i]; });
+            }
         };
 
         ScatterPlot.prototype._setup = function() {
@@ -171,12 +179,14 @@ vis.svg = (function(vis) {
                         // Attention! This call will asynchronously fire another brush process with an empty selection.
                         $this.container.select('.brush').call($this.brush.move, null);
 
+                        // Update modules that connected to this module.
+                        $this.module.trigger();
                     } else {
                         if ($this.maintainSelection) {
                             // Avoid clearing selected data after a valid selection.
                             $this.maintainSelection = false;
                         } else {
-                            // Click blank area will fire 'end' with empty selection. D3 originally uses this for clear the brush.
+                            // Click blank area will fire 'end' with empty selection. D3 originally uses this to clear the brush.
                             $this.selection = {};
                             $this.container.selectAll('circle')
                                 .classed('vis-svg-scatter-selected', false);
@@ -234,7 +244,7 @@ vis.svg = (function(vis) {
     })();
 
     var construct = {
-        'scatter-plot': function(widgetID) { return new ScatterPlot(widgetID); }
+        'scatter-plot': function(module, widgetID) { return new ScatterPlot(module, widgetID); }
     };
 
     return {

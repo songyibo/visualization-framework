@@ -7,6 +7,12 @@ vis.connection = (function(vis) {
         this.end = end;
     }
 
+    Connection.prototype.remove = function() {
+        if (this.path) this.path.remove();
+        this.start.connect.remove(this.end.id);
+        this.end.connect.remove(this.start.id);
+    };
+
     function ConnectControl(canvasID) {
         this.cid = canvasID;
         this.svg = d3.select('#' + this.cid);
@@ -18,6 +24,15 @@ vis.connection = (function(vis) {
     }
 
     ConnectControl.prototype.connect = function(start, end) {
+        if (start.type != 'output' || end.type != 'input')
+            return;
+
+        for (var i = 0; i < end.connect.length; i++) {
+            var p = end.connect.at(i);
+            var id = this._id(p, end);
+            this.remove(id);
+        }
+
         this.add(start, end);
 
         var f1 = vis.attribute.attr[start.attribute];
@@ -34,6 +49,9 @@ vis.connection = (function(vis) {
     ConnectControl.prototype.add = function(start, end) {
         var id = this._id(start, end);
         this.remove(id);
+
+        start.connectTo(end);
+        end.connectedFrom(start);
 
         var c = new Connection(id, start, end);
         c.path = this.svg.append('path')
@@ -52,7 +70,7 @@ vis.connection = (function(vis) {
     ConnectControl.prototype.remove = function(id) {
         if (this.connections[id]) {
             var c = this.connections[id];
-            c.path.remove();
+            c.remove();
             delete this.connections[id];
         }
     };

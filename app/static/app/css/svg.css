@@ -18,3 +18,7 @@
 .vis-svg-scatter-selected {
 	fill: red;
 }
+
+.vis-svg-scatter-highlighted {
+	fill: #00ff1e;
+}

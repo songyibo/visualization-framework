@@ -103,8 +103,6 @@ vis.port = (function(vis) {
                 start: function() {
                     $(document).on('vis-connect', function(e, thatPort) {
                         vis.control.instance().connections.connect(thisPort, thatPort);
-                        thisPort.connectTo(thatPort);
-                        thatPort.connectedFrom(thisPort);
                     });
                 },
                 connect: function(x, y) {
@@ -241,6 +239,11 @@ vis.port = (function(vis) {
                 p.resize({x: x, y: y + i * (margin + size), w: size, h: size});
                 vis.control.instance().connections.updatePort(p);
             }
+        };
+
+        PortManager.prototype.connectedModules = function() {
+
+            return [];
         };
 
         return PortManager;
