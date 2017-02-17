@@ -190,6 +190,9 @@ vis.svg = (function(vis) {
                             $this.selection = {};
                             $this.container.selectAll('circle')
                                 .classed('vis-svg-scatter-selected', false);
+
+                            // Update connected modules.
+                            $this.module.trigger();
                         }
                     }
                 });

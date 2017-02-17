@@ -241,9 +241,26 @@ vis.port = (function(vis) {
             }
         };
 
-        PortManager.prototype.connectedModules = function() {
+        PortManager.prototype.updateConnections = function() {
+            for (var i = 0; i < this.output.length; i++) {
+                var k = this.output.key(i);
+                var start = this.all.get(k);
 
-            return [];
+                for (var j = 0; j < start.connect.length; j++) {
+                    var end = start.connect.at(j);
+
+                    var f1 = vis.attribute.attr[start.attribute];
+                    var a1 = f1 ? f1(start) : null;
+                    var data = a1 ? a1.data(start.module, data): null;
+
+                    var f2 = vis.attribute.attr[end.attribute];
+                    var a2 = f2 ? f2(end) : null;
+                    if (a2) { a2.merge(end.module, data); }
+
+                    end.module.update();
+                    end.module.trigger();
+                }
+            }
         };
 
         return PortManager;

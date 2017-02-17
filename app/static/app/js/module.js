@@ -55,8 +55,7 @@ vis.module = (function(vis) {
         };
 
         Module.prototype.trigger = function() {
-            // TODO: Update downstream modules.
-            // What if A->B, A->C, B->C?
+            this.ports.updateConnections();
         };
 
         return Module;
@@ -159,7 +158,7 @@ vis.module = (function(vis) {
                     {
                         element: 'circle', type: 'input', name: 'circle', text: 'Circle',
                         attributes: [
-                            {attribute: 'color', name: 'color', text: 'Color', active: true},
+                            {attribute: 'color', name: 'color', text: 'Color', active: false},
                             {attribute: 'size', name: 'size', text: 'Size', active: false}
                         ]
                     },
@@ -184,7 +183,6 @@ vis.module = (function(vis) {
         ScatterPlotModule.prototype.update = function() {
             var data = vis.control.instance().getDataset(this.settings.dataset).data.root;
             this.widget.refresh(data, this.settings);
-            this.trigger();
         };
 
         return ScatterPlotModule;
@@ -285,15 +283,11 @@ vis.module = (function(vis) {
     var construct = {
         'data-source': function() { return new DataSourceModule(); },
         'scatter-plot': function() { return new ScatterPlotModule(); },
-
-        'custom-view': function() { return new CustomViewModule(); }
     };
  
     return {
         DataSource: DataSourceModule,
         ScatterPlot: ScatterPlotModule,
-        CustomView: CustomViewModule,
-
         construct: construct
     };
     
