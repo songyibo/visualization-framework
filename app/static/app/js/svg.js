@@ -137,6 +137,10 @@ vis.svg = (function(vis) {
             var $this = this;
             var x = this.xDataToPlot, y = this.yDataToPlot, config = this.config;
 
+            this.svg.on('mousedown', function() {
+                d3.event.stopPropagation();
+            });
+
             // Brushing selection.
             this.brush = d3.brush()
                 .on('start', function() {
